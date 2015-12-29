@@ -13,6 +13,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 
+#include "../common/SocketFactory.hpp"
 #include "../common/MulticastUtils.hpp"
 #include "../common/consts.hpp"
 

@@ -20,7 +20,6 @@
 
 class MulticastUtils {
 public:
-    bool getAddress(const char *hostname, const char *service, int family, int socktype, struct sockaddr_storage *addr);
     bool isMulticastAddress(struct sockaddr_storage *addr);
     bool joinMulticastGroup(int sockfd, struct sockaddr_storage *addr);
     bool setMulticastInterface(int sockfd, const char *multicastInterface, struct sockaddr_storage *addr);

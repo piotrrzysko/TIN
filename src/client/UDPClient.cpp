@@ -31,20 +31,16 @@ void UDPClient::receive()
 
 bool UDPClient::initClient(const char *multicastAddr, const char *port)
 {
-    MulticastUtils utils;
+    SocketFactory socketFactory;
+    MulticastUtils multicastUtils;
     struct sockaddr_storage addr;
 
     memset(&addr, 0, sizeof(addr));
-    if (!utils.getAddress(multicastAddr, port, PF_UNSPEC, SOCK_DGRAM, &addr))
+    sockfd = socketFactory.createSocket(multicastAddr, port, AF_UNSPEC, SOCK_DGRAM, &addr, false);
+    if (sockfd == -1)
     {
-        return false;
-    }
-
-    sockfd = socket(addr.ss_family, SOCK_DGRAM, 0);
-    if (bind(sockfd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
-    {
-        logger::error << "bind error::\n";
-        close(sockfd);
+        perror("createSocket error::");
+        logger::error << "createSocket error::\n";
         return false;
     }
 
@@ -55,7 +51,7 @@ bool UDPClient::initClient(const char *multicastAddr, const char *port)
         return false;
     }
 
-    if (!utils.joinMulticastGroup(sockfd, &addr))
+    if (!multicastUtils.joinMulticastGroup(sockfd, &addr))
     {
         logger::error << "joinMulticastGroup error::\n";
         close(sockfd);

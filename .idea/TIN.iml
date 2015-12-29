@@ -5,14 +5,20 @@
       <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/CMakeLists.txt" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/client/CMakeLists.txt" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/client/TCPClient.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/client/TCPClient.hpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/client/UDPClient.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/client/UDPClient.hpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/client/client_main.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/common/CMakeLists.txt" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/common/MulticastUtils.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/common/MulticastUtils.hpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/common/SocketFactory.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/common/SocketFactory.hpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/common/consts.hpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/server/CMakeLists.txt" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/server/TCPServer.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/server/TCPServer.hpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/server/UDPServer.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/server/UDPServer.hpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/server/server_main.cpp" isTestSource="false" />
@@ -40,19 +46,25 @@
           <root url="file:///usr/local/include" />
         </SOURCES>
         <excluded>
-          <root url="file://$MODULE_DIR$/src/server/UDPServer.cpp" />
-          <root url="file://$MODULE_DIR$/src/client/UDPClient.hpp" />
-          <root url="file://$MODULE_DIR$/src/CMakeLists.txt" />
-          <root url="file://$MODULE_DIR$/src/server/UDPServer.hpp" />
           <root url="file://$MODULE_DIR$/src/client/client_main.cpp" />
           <root url="file://$MODULE_DIR$/src/client/UDPClient.cpp" />
-          <root url="file://$MODULE_DIR$/src/common/MulticastUtils.hpp" />
-          <root url="file://$MODULE_DIR$/src/server/server_main.cpp" />
-          <root url="file://$MODULE_DIR$/src/client/CMakeLists.txt" />
-          <root url="file://$MODULE_DIR$/src/common/MulticastUtils.cpp" />
-          <root url="file://$MODULE_DIR$/src/common/CMakeLists.txt" />
+          <root url="file://$MODULE_DIR$/src/common/SocketFactory.hpp" />
           <root url="file://$MODULE_DIR$/src/common/consts.hpp" />
+          <root url="file://$MODULE_DIR$/src/server/TCPServer.hpp" />
+          <root url="file://$MODULE_DIR$/src/client/CMakeLists.txt" />
+          <root url="file://$MODULE_DIR$/src/server/UDPServer.cpp" />
+          <root url="file://$MODULE_DIR$/src/client/UDPClient.hpp" />
+          <root url="file://$MODULE_DIR$/src/common/SocketFactory.cpp" />
+          <root url="file://$MODULE_DIR$/src/common/CMakeLists.txt" />
+          <root url="file://$MODULE_DIR$/src/CMakeLists.txt" />
+          <root url="file://$MODULE_DIR$/src/server/TCPServer.cpp" />
+          <root url="file://$MODULE_DIR$/src/common/MulticastUtils.cpp" />
+          <root url="file://$MODULE_DIR$/src/common/MulticastUtils.hpp" />
+          <root url="file://$MODULE_DIR$/src/server/UDPServer.hpp" />
           <root url="file://$MODULE_DIR$/src/server/CMakeLists.txt" />
+          <root url="file://$MODULE_DIR$/src/client/TCPClient.hpp" />
+          <root url="file://$MODULE_DIR$/src/client/TCPClient.cpp" />
+          <root url="file://$MODULE_DIR$/src/server/server_main.cpp" />
         </excluded>
       </library>
     </orderEntry>

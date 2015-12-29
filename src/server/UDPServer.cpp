@@ -27,29 +27,25 @@ void UDPServer::send(/*const string& filePath*/)
 
 bool UDPServer::initServer(const char *multicastAddr, const char *multicastInterface, const char *port)
 {
-    MulticastUtils utils;
+    SocketFactory socketFactory;
+    MulticastUtils multicastUtils;
 
     memset(&addr, 0, sizeof(addr));
-    if (!utils.getAddress(multicastAddr, port, PF_UNSPEC, SOCK_DGRAM, &addr))
+    sockfd = socketFactory.createSocket(multicastAddr, port, AF_UNSPEC, SOCK_DGRAM, &addr, false);
+    if (sockfd == -1)
     {
+        perror("createSocket error::");
+        logger::error << "createSocket error::\n";
         return false;
     }
 
-    if (!utils.isMulticastAddress(&addr)<0)
+    if (!multicastUtils.isMulticastAddress(&addr)<0)
     {
         logger::error << "Bledy adres multicast.\n";
         return false;
     }
 
-    sockfd = socket(addr.ss_family, SOCK_DGRAM, 0);
-    if (bind(sockfd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
-    {
-        logger::error << "bind error::\n";
-        close(sockfd);
-        return false;
-    }
-
-    if (!utils.setMulticastInterface(sockfd, multicastInterface, &addr)<0)
+    if (!multicastUtils.setMulticastInterface(sockfd, multicastInterface, &addr)<0)
     {
         logger::error << "Setting local interface error\n";
         close(sockfd);

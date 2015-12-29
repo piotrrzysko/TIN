@@ -7,42 +7,6 @@
 
 #include "MulticastUtils.hpp"
 
-bool MulticastUtils::getAddress(const char *hostname, const char *service, int family, int socktype,
-                                struct sockaddr_storage *addr)
-{
-    struct addrinfo hints, *addrCandidates, *addrCandidatesHead;
-
-    memset(&hints, 0, sizeof(struct addrinfo));
-    hints.ai_family = family;
-    hints.ai_socktype = socktype;
-
-    if (int error = getaddrinfo(hostname, service, &hints, &addrCandidates) < 0)
-    {
-        logger::error << "getaddrinfo error:: " << gai_strerror(error) << "\n";
-        return false;
-    }
-
-    addrCandidatesHead = addrCandidates;
-    while (addrCandidates)
-    {
-        int sockfd = socket(addrCandidates->ai_family, addrCandidates->ai_socktype, addrCandidates->ai_protocol);
-        if (!(sockfd < 0))
-        {
-            if (bind(sockfd, addrCandidates->ai_addr, addrCandidates->ai_addrlen) == 0)
-            {
-                close(sockfd);
-                memcpy(addr, addrCandidates->ai_addr, sizeof(*addr));
-                break;
-            }
-            close(sockfd);
-        }
-        addrCandidates = addrCandidates->ai_next;
-    }
-
-    freeaddrinfo(addrCandidatesHead);
-    return true;
-}
-
 bool MulticastUtils::isMulticastAddress(struct sockaddr_storage *addr)
 {
     switch (addr->ss_family)

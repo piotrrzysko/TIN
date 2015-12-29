@@ -6,9 +6,13 @@
  */
 
 #include "UDPClient.hpp"
+#include "TCPClient.hpp"
 
 int main(int argc, char** argv)
 {
-    UDPClient client("224.0.0.1", "8888");
-    client.receive();
+   // UDPClient client("224.0.0.1", "8888");
+   // client.receive();
+
+    TCPClient tcpClient("10.1.1.1", "5555");
+    tcpClient.send();
 }

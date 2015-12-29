@@ -18,7 +18,9 @@ for HOSTNAME in "$@"
 do
 	echo Deploying to host "$HOSTNAME"...
 
-	sshpass -p "$PASSWORD" ssh -o StrictHostKeychecking=no "$USER"@"$HOSTNAME" -t -t "rm -r $REMOTE_DIR & mkdir -p $REMOTE_DIR"
+#	sshpass -p "$PASSWORD" ssh -o StrictHostKeychecking=no "$USER"@"$HOSTNAME" -t -t "rm -r $REMOTE_DIR & mkdir -p $REMOTE_DIR"
+
+	sshpass -p "$PASSWORD" ssh -o StrictHostKeychecking=no "$USER"@"$HOSTNAME" -t -t "mkdir -p $REMOTE_DIR"
 
 	sshpass -p "$PASSWORD" scp -r $LOCAL_DIR "$USER"@"$HOSTNAME":"$REMOTE_DIR"
 done
