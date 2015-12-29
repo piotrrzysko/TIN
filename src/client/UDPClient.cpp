@@ -18,15 +18,66 @@ UDPClient::UDPClient(const char *multicastAddr, const char *port)
     }
 }
 
-void UDPClient::receive()
+void UDPClient::start()
 {
-    char timeStr[256];
-    struct sockaddr_storage clientaddr;
-    socklen_t clientaddrlen = sizeof(clientaddr);
+    Parser datagramParser;
+    char buffer[MAX_DATAGRAM_SIZE];
 
-    memset(timeStr, 0, sizeof(timeStr));
-    recvfrom(sockfd, timeStr, sizeof(timeStr), 0, (struct sockaddr *)&clientaddr, &clientaddrlen);
-    logger::info << "Odebrano: " << timeStr;
+
+    while(true)
+    {
+        memset(buffer, 0, sizeof(buffer));
+        if (recvfrom(sockfd, buffer, sizeof(buffer), 0, NULL, 0) == -1)
+        {
+            // TODO: obsluzyc
+        } else
+        {
+            uint fileId, number;
+            std::string data;
+            bool isLast = false, wrongDatagram = false;
+
+            if (!datagramParser.matchMiddle(buffer, fileId, number, data))
+            {
+                if (!datagramParser.matchBegin(buffer, fileId, number, data))
+                {
+                    if (datagramParser.matchEnd(buffer, fileId, number, data))
+                    {
+                        isLast = true;
+                    } else
+                    {
+                        wrongDatagram  = true;
+                    }
+                }
+            }
+            if (!wrongDatagram)
+            {
+                logger::info << "Received: datagram_num = [" << number << "] file_id = [" << fileId << "].\n";
+
+                std::map<uint, ReceivedVideoFile>::iterator it = videoFiles.find(fileId);
+                if (it != videoFiles.end())
+                {
+                    it->second.addData(number, data, isLast);
+                } else
+                {
+                    ReceivedVideoFile file;
+                    file.addData(number, data, isLast);
+                    videoFiles[fileId] = file;
+                    it = videoFiles.find(fileId);
+                }
+                if (it->second.isFull())
+                {
+                    std::string filePath = "./test_" + std::to_string(it->first);
+                    it->second.writeToFile(filePath);
+                    videoFiles.erase(it);
+                    logger::info << "Saved: file_id = [" << fileId << "] to file = [" << filePath << "].\n";
+                }
+            } else
+            {
+                logger::error << "Wrong datagram.\n";
+            }
+        }
+    }
+
 }
 
 bool UDPClient::initClient(const char *multicastAddr, const char *port)

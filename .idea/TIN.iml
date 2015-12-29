@@ -5,6 +5,10 @@
       <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/CMakeLists.txt" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/client/CMakeLists.txt" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/client/Parser.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/client/Parser.hpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/client/ReceivedVideoFile.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/client/ReceivedVideoFile.hpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/client/TCPClient.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/client/TCPClient.hpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/client/UDPClient.cpp" isTestSource="false" />
@@ -21,6 +25,8 @@
       <sourceFolder url="file://$MODULE_DIR$/src/server/TCPServer.hpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/server/UDPServer.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/server/UDPServer.hpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/server/VideoFile.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/server/VideoFile.hpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/server/server_main.cpp" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
@@ -46,11 +52,14 @@
           <root url="file:///usr/local/include" />
         </SOURCES>
         <excluded>
+          <root url="file://$MODULE_DIR$/src/client/Parser.hpp" />
           <root url="file://$MODULE_DIR$/src/client/client_main.cpp" />
           <root url="file://$MODULE_DIR$/src/client/UDPClient.cpp" />
           <root url="file://$MODULE_DIR$/src/common/SocketFactory.hpp" />
-          <root url="file://$MODULE_DIR$/src/common/consts.hpp" />
+          <root url="file://$MODULE_DIR$/src/server/VideoFile.cpp" />
           <root url="file://$MODULE_DIR$/src/server/TCPServer.hpp" />
+          <root url="file://$MODULE_DIR$/src/server/VideoFile.hpp" />
+          <root url="file://$MODULE_DIR$/src/client/Parser.cpp" />
           <root url="file://$MODULE_DIR$/src/client/CMakeLists.txt" />
           <root url="file://$MODULE_DIR$/src/server/UDPServer.cpp" />
           <root url="file://$MODULE_DIR$/src/client/UDPClient.hpp" />
@@ -61,9 +70,12 @@
           <root url="file://$MODULE_DIR$/src/common/MulticastUtils.cpp" />
           <root url="file://$MODULE_DIR$/src/common/MulticastUtils.hpp" />
           <root url="file://$MODULE_DIR$/src/server/UDPServer.hpp" />
+          <root url="file://$MODULE_DIR$/src/common/consts.hpp" />
+          <root url="file://$MODULE_DIR$/src/client/ReceivedVideoFile.cpp" />
           <root url="file://$MODULE_DIR$/src/server/CMakeLists.txt" />
           <root url="file://$MODULE_DIR$/src/client/TCPClient.hpp" />
           <root url="file://$MODULE_DIR$/src/client/TCPClient.cpp" />
+          <root url="file://$MODULE_DIR$/src/client/ReceivedVideoFile.hpp" />
           <root url="file://$MODULE_DIR$/src/server/server_main.cpp" />
         </excluded>
       </library>
