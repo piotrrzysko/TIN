@@ -21,7 +21,7 @@
 
 class SocketFactory {
 public:
-    int createSocket(const char *hostname, const char *service, int family, int socktype, struct sockaddr_storage *addr,
+    int createSocket(std::string hostname, std::string service, int family, int socktype, struct sockaddr_storage *addr,
                     bool isClient);
 };
 

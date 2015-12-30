@@ -11,24 +11,36 @@
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <functional>
+#include <chrono>
+#include <thread>
+#include <mutex>
+#include <vector>
 
 #include "../common/MulticastUtils.hpp"
 #include "../common/SocketFactory.hpp"
 #include "../common/consts.hpp"
-#include "Parser.hpp"
+#include "../common/Parser.hpp"
 #include "ReceivedVideoFile.hpp"
+#include "ClientController.hpp"
+
+class ClientController;
 
 class UDPClient {
 public:
-    UDPClient(const char *multicastAddr, const char *port);
+    UDPClient(std::string multicastAddr, std::string port, ClientController *parent);
     void start();
 
 private:
     int sockfd;
 
+    mutable std::mutex mutex_files;
     std::map<uint, ReceivedVideoFile> videoFiles;
+    ClientController *parent;
 
-    bool initClient(const char *multicastAddr, const char *port);
+    bool initClient(std::string multicastAddr, std::string port);
+    void manageVideoFiles(uint interval);
+    void startVideoFilesManage();
 };
 
 

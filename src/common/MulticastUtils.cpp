@@ -68,11 +68,11 @@ bool MulticastUtils::joinMulticastGroup(int sockfd, struct sockaddr_storage *add
     return true;
 }
 
-bool MulticastUtils::setMulticastInterface(int sockfd, const char *multicastInterface, struct sockaddr_storage *addr)
+bool MulticastUtils::setMulticastInterface(int sockfd, std::string multicastInterface, struct sockaddr_storage *addr)
 {
     unsigned char localInterface[sizeof(struct in6_addr)];
     memset(&localInterface, 0, sizeof(localInterface));
-    if (inet_pton(addr->ss_family, multicastInterface, &localInterface) <= 0)
+    if (inet_pton(addr->ss_family, multicastInterface.c_str(), &localInterface) <= 0)
     {
         logger::error << "inet_pton error\n";
         return false;

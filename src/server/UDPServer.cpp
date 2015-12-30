@@ -7,7 +7,8 @@
 
 #include "UDPServer.hpp"
 
-UDPServer::UDPServer(const char *multicastAddr, const char *multicastInterface, const char *port) : lastFileId(0)
+UDPServer::UDPServer(std::string multicastAddr, std::string multicastInterface, std::string port, ServerController *parent)
+        : parent(parent), lastFileId(0)
 {
     if (initServer(multicastAddr, multicastInterface, port))
     {
@@ -21,34 +22,37 @@ UDPServer::UDPServer(const char *multicastAddr, const char *multicastInterface, 
 void UDPServer::start()
 {
     // TODO: Przerobic na kolejke blokujaca
-    while(!filesToSendQueue.empty())
+    while(true)
     {
-        VideoFile videofileToSend = filesToSendQueue.top();
-        filesToSendQueue.pop();
-
-        std::ifstream videoFile;
-        videoFile.open(videofileToSend.getLocalPath());
-        bool isBegin = true;
-        uint datagramNumber = 1;
-        while(!videoFile.eof())
+        if(parent->hasClients() && !filesToSendQueue.empty())
         {
-            int maxDataSize = MAX_DATAGRAM_SIZE - DATAGRAM_CUSTOM_HEADER_SIZE;
-            char bytesFromFile[maxDataSize];
-            memset(bytesFromFile, 0, maxDataSize);
-            videoFile.read(bytesFromFile, maxDataSize);
+            VideoFile videofileToSend = filesToSendQueue.top();
+            filesToSendQueue.pop();
 
-            if (isBegin)
+            std::ifstream videoFile;
+            videoFile.open(videofileToSend.getLocalPath());
+            bool isBegin = true;
+            uint datagramNumber = 1;
+            while(!videoFile.eof())
             {
-                sendDatagram(datagramNumber, videofileToSend.getId(), DatagramTypes::Begin, bytesFromFile);
-            } else
-            {
-                sendDatagram(datagramNumber, videofileToSend.getId(), DatagramTypes::Middle, bytesFromFile);
+                int maxDataSize = MAX_DATAGRAM_SIZE - DATAGRAM_CUSTOM_HEADER_SIZE;
+                char bytesFromFile[maxDataSize];
+                memset(bytesFromFile, 0, maxDataSize);
+                videoFile.read(bytesFromFile, maxDataSize);
+
+                if (isBegin)
+                {
+                    sendDatagram(datagramNumber, videofileToSend.getId(), UdpMessagesTypes::Begin, bytesFromFile);
+                } else
+                {
+                    sendDatagram(datagramNumber, videofileToSend.getId(), UdpMessagesTypes::Middle, bytesFromFile);
+                }
+                isBegin = false;
+                datagramNumber++;
             }
-            isBegin = false;
-            datagramNumber++;
+            sendDatagram(datagramNumber, videofileToSend.getId(), UdpMessagesTypes::End, "");
+            videoFile.close();
         }
-        sendDatagram(datagramNumber, videofileToSend.getId(), DatagramTypes::End, "");
-        videoFile.close();
     }
 }
 
@@ -58,6 +62,7 @@ void UDPServer::addFiles(std::list<VideoFile> filesToSend)
     {
         lastFileId++;
         videoFiles[lastFileId] = *iter;
+        addFileToQueue(lastFileId);
     }
 }
 
@@ -71,7 +76,7 @@ void UDPServer::addFileToQueue(uint fileId)
     }
 }
 
-bool UDPServer::initServer(const char *multicastAddr, const char *multicastInterface, const char *port)
+bool UDPServer::initServer(std::string multicastAddr, std::string multicastInterface, std::string port)
 {
     SocketFactory socketFactory;
     MulticastUtils multicastUtils;
@@ -105,10 +110,7 @@ bool UDPServer::sendDatagram(uint datagramNumber, uint fileId, std::string type,
     char datagram[MAX_DATAGRAM_SIZE];
     std::stringstream ss("");
 
-    ss << type << " ";
-    ss << fileId << " ";
-    ss << datagramNumber << "\n";
-    ss << data;
+    ss << type << " " << fileId << " " << datagramNumber << "\n" << data;
 
     memset(datagram, 0, MAX_DATAGRAM_SIZE);
     memcpy(datagram, ss.str().c_str(), ss.str().size());

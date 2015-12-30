@@ -1,6 +1,7 @@
 project (AdvertCast)
 cmake_minimum_required(VERSION 3.0)
-set (CMAKE_CXX_FLAGS "-Wall -std=c++11 -lpthread")
+
+set (CMAKE_CXX_FLAGS "-Wall -std=c++11 -pthread")
 
 include_directories (${AdvertCast_SOURCE_DIR}/src)
 set (EXECUTABLE_OUTPUT_PATH "${AdvertCast_BINARY_DIR}/bin")

@@ -22,7 +22,7 @@ class MulticastUtils {
 public:
     bool isMulticastAddress(struct sockaddr_storage *addr);
     bool joinMulticastGroup(int sockfd, struct sockaddr_storage *addr);
-    bool setMulticastInterface(int sockfd, const char *multicastInterface, struct sockaddr_storage *addr);
+    bool setMulticastInterface(int sockfd, std::string multicastInterface, struct sockaddr_storage *addr);
 };
 
 

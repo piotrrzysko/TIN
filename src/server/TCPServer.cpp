@@ -8,10 +8,7 @@
 
 #include "TCPServer.hpp"
 
-#define MAX_LISTEN_QUEUE 128
-#define BUFFER_SIZE 1024
-
-TCPServer::TCPServer(const char *hostname, const char *port)
+TCPServer::TCPServer(std::string hostname, std::string port, ServerController *parent) : lastClientId(0), parent(parent)
 {
     if (initServer(hostname, port))
     {
@@ -45,18 +42,11 @@ void TCPServer::start()
 
             logger::info << "Received request from host=[" << clienthost << "] port=[" << clientservice << "]\n";
 
-            int rval;
-            char buf[BUFFER_SIZE];
-            do {
-                memset(buf, 0, sizeof buf);
-                if ((rval = read(connfd, buf, BUFFER_SIZE)) == -1)
-                    logger:: error << "reading stream message\n";
-                if (rval == 0)
-                    logger::info << "Ending connection\n";
-                else
-                    logger::info << "-->" << buf << "\n";
-            } while (rval != 0);
-
+            std::string line;
+            while(readLine(connfd, &line))
+            {
+                handleRequest(line, connfd);
+            }
             close(connfd);
         } else
         {
@@ -64,8 +54,28 @@ void TCPServer::start()
         }
     }
 }
+bool TCPServer::readLine(int fd, std::string* line)
+{
+    std::string::iterator pos;
+    while ((pos = find(buffer.begin(), buffer.end(), '\n')) == buffer.end())
+    {
+        char buf [1025];
+        ssize_t n = read (fd, buf, 1024);
+        if (n == -1)
+        {
+            *line = buffer;
+            buffer = "";
+            return false;
+        }
+        buf [n] = 0;
+        buffer += buf;
+    }
+    *line = std::string(buffer.begin(), pos);
+    buffer = std::string(pos + 1, buffer.end());
+    return true;
+}
 
-bool TCPServer::initServer(const char *hostname, const char *port)
+bool TCPServer::initServer(std::string hostname, std::string port)
 {
     SocketFactory socketFactory;
     struct sockaddr_storage addr;
@@ -86,4 +96,45 @@ bool TCPServer::initServer(const char *hostname, const char *port)
         return false;
     }
     return true;
+}
+
+void TCPServer::handleRequest(const std::string &msg, int connfd)
+{
+    uint clientId, fileId;
+    std::string data;
+
+    if (parser.matchNAK(msg, clientId, fileId))
+    {
+        logger::info << "Received NAK from client_id = [" << clientId << "] file_id = [" << fileId << "].\n";
+        parent->addFileToQueue(fileId);
+    } else if (parser.matchReport(msg, clientId, data))
+    {
+        logger::info << "Received REPORT from client_id = [" << clientId << "] data = [" << data << "].\n";
+    } else if (parser.matchConnect(msg))
+    {
+        logger::info << "Received CONNECT.\n";
+
+        handleConnect(connfd);
+    } else
+    {
+        logger::error << "Wrong request.\n";
+    }
+}
+
+void TCPServer::handleConnect(int connfd)
+{
+    clients.push_back(++lastClientId);
+
+    std::stringstream ss("");
+    ss << TcpMessagesTypes::Client << " " << lastClientId << "\n";
+
+    if (write(connfd, ss.str().c_str(), ss.str().size()) == -1)
+    {
+        logger::error << "writing on stream socket\n";
+    }
+}
+
+bool TCPServer::hasClients()
+{
+    return clients.size() > 0;
 }

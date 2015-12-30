@@ -4,7 +4,9 @@ set (server_SRCS
         TCPServer.cpp
         TCPServer.hpp
         VideoFile.hpp
-        VideoFile.cpp)
+        VideoFile.cpp
+        ServerController.cpp
+        ServerController.hpp)
 
 add_executable (server ${server_SRCS})
 target_link_libraries (server common)

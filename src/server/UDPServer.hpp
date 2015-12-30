@@ -23,10 +23,13 @@
 #include "../common/SocketFactory.hpp"
 #include "../common/MulticastUtils.hpp"
 #include "../common/consts.hpp"
+#include "ServerController.hpp"
+
+class ServerController;
 
 class UDPServer {
 public:
-    UDPServer(const char *multicastAddr, const char *multicastInterface, const char *port);
+    UDPServer(std::string, std::string multicastInterface, std::string port, ServerController *parent);
     void addFiles(std::list<VideoFile> filesToSend);
     void addFileToQueue(uint fileId);
     void start();
@@ -35,11 +38,13 @@ private:
     struct sockaddr_storage addr;
     int sockfd;
 
+    ServerController *parent;
+
     uint lastFileId;
     std::unordered_map<uint, VideoFile> videoFiles;
     std::priority_queue<VideoFile> filesToSendQueue;
 
-    bool initServer(const char *multicastAddr, const char *multicastInterface, const char *port);
+    bool initServer(std::string multicastAddr, std::string multicastInterface, std::string port);
     bool sendDatagram(uint datagramNumber, uint fileId, std::string type, std::string data);
 };
 

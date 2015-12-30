@@ -12,14 +12,21 @@
 #include <string>
 #include <sstream>
 
-#include "../common/consts.hpp"
-#include "../common/Logger.hpp"
+#include "consts.hpp"
+#include "Logger.hpp"
 
 class Parser {
 public:
+    // UDP
     bool matchBegin(const std::string &datagram, uint &fileId, uint &number, std::string &data);
     bool matchEnd(const std::string &datagram, uint &fileId, uint &number, std::string &data);
     bool matchMiddle(const std::string &datagram, uint &fileId, uint &number, std::string &data);
+
+    // TCP
+    bool matchNAK(const std::string &msg, uint &clientId, uint &fileId);
+    bool matchReport(const std::string &msg, uint &clientId, std::string &data);
+    bool matchConnect(const std::string &msg);
+    bool matchClient(const std::string &msg, uint &clientId);
 
 private:
     bool parse(const std::string expectedType, const std::string &datagram, uint &fileId,

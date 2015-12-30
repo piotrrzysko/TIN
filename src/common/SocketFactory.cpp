@@ -7,7 +7,7 @@
 
 #include "SocketFactory.hpp"
 
-int SocketFactory::createSocket(const char *hostname, const char *service, int family, int socktype,
+int SocketFactory::createSocket(std::string hostname, std::string service, int family, int socktype,
                                 struct sockaddr_storage *addr, bool isClient)
 {
     struct addrinfo hints, *addrCandidates, *addrCandidatesHead;
@@ -17,7 +17,13 @@ int SocketFactory::createSocket(const char *hostname, const char *service, int f
     hints.ai_family = family;
     hints.ai_socktype = socktype;
 
-    if (int error = getaddrinfo(hostname, service, &hints, &addrCandidates) < 0)
+    const char *hostnameChar;
+    if (hostname == "")
+        hostnameChar = NULL;
+    else
+        hostnameChar = hostname.c_str();
+
+    if (int error = getaddrinfo(hostnameChar, service.c_str(), &hints, &addrCandidates) < 0)
     {
         logger::error << "getaddrinfo error:: " << gai_strerror(error) << "\n";
         return -1;

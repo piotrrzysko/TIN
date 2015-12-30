@@ -7,11 +7,12 @@
 
 #include "UDPClient.hpp"
 
-UDPClient::UDPClient(const char *multicastAddr, const char *port)
+UDPClient::UDPClient(std::string multicastAddr, std::string port, ClientController *parent) : parent(parent)
 {
     if (initClient(multicastAddr, port))
     {
         logger::info << "Klient UDP zostal uruchomiony.\n";
+        startVideoFilesManage();
     } else
     {
         logger::error << "Wystapil blad podczas uruchamiania klienta UDP.\n";
@@ -22,7 +23,6 @@ void UDPClient::start()
 {
     Parser datagramParser;
     char buffer[MAX_DATAGRAM_SIZE];
-
 
     while(true)
     {
@@ -52,7 +52,7 @@ void UDPClient::start()
             if (!wrongDatagram)
             {
                 logger::info << "Received: datagram_num = [" << number << "] file_id = [" << fileId << "].\n";
-
+                mutex_files.lock();
                 std::map<uint, ReceivedVideoFile>::iterator it = videoFiles.find(fileId);
                 if (it != videoFiles.end())
                 {
@@ -71,6 +71,7 @@ void UDPClient::start()
                     videoFiles.erase(it);
                     logger::info << "Saved: file_id = [" << fileId << "] to file = [" << filePath << "].\n";
                 }
+                mutex_files.unlock();
             } else
             {
                 logger::error << "Wrong datagram.\n";
@@ -80,7 +81,7 @@ void UDPClient::start()
 
 }
 
-bool UDPClient::initClient(const char *multicastAddr, const char *port)
+bool UDPClient::initClient(std::string multicastAddr, std::string port)
 {
     SocketFactory socketFactory;
     MulticastUtils multicastUtils;
@@ -110,4 +111,37 @@ bool UDPClient::initClient(const char *multicastAddr, const char *port)
     }
 
     return true;
+}
+
+void UDPClient::startVideoFilesManage()
+{
+    std::thread t1(&UDPClient::manageVideoFiles, this,  MANAGE_VIDEO_FILES_INTERVAL);
+    t1.detach();
+}
+
+void UDPClient::manageVideoFiles(uint interval)
+{
+    while(true)
+    {
+        mutex_files.lock();
+        std::vector<uint> fileIds;
+        std::map<uint, ReceivedVideoFile>::iterator it;
+        for (it = videoFiles.begin(); it != videoFiles.end();)
+        {
+            if (it->second.isExpired())
+            {
+                fileIds.push_back(it->first);
+                logger::warn << "File is expired: file_id = [" << it->first << "]\n";
+                // TODO: dodac komunikat do wyslania do serwera
+                it = videoFiles.erase(it);
+            }
+            else
+            {
+                ++it;
+            }
+        }
+        mutex_files.unlock();
+        parent->sendNAKs(fileIds);
+        std::this_thread::sleep_for (std::chrono::seconds(interval));
+    }
 }
