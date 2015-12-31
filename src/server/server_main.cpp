@@ -6,26 +6,80 @@
  */
 
 #include "ServerController.hpp"
+#include "../common/Args.hpp"
+
+void showUsage()
+{
+    std::cout << "Usage: ./server -i INTERFACE -m MULTICAST_ADDR -u UDP_PORT -t TCP_PORT -f FILES_LIST" << std::endl;
+}
 
 int main(int argc, char** argv)
 {
     ServerController server;
+    bool portUdp = false, portTcp = false, files = false,
+            interface = false, multicastAddr = false;
 
-    // TODO: do argumentow
-    std::list<VideoFile> filesToSend;
-
-    for (int t = 0; t < 2; t++)
+    if (argc != 11)
     {
-        filesToSend.push_back(VideoFile(t, "./files/test02.pdf"));
-        //filesToSend.push_back(VideoFile(t, "./files/test01.txt"));
+        showUsage();
+        return -1;
     }
 
+    Args args(argc, argv);
+    while(!args.isEnd())
+    {
+        std::string arg;
+        switch (args.getNext(arg))
+        {
+            case Arg::Undefined:
+            case Arg::Usage:
+                showUsage();
+                return EXIT_SUCCESS;
 
-    server.setFilesToSend(filesToSend);
-    server.setMulticastAddr("224.0.0.1");
-    server.setMulticastInterface("10.1.1.1");
-    server.setUdpPort("8888");
-    server.setTcpPort("5555");
+            case Arg::MulticastInterface:
+                server.setMulticastInterface(arg);
+                interface = true;
+                break;
 
-    server.start();
+            case Arg::MulticastAddr:
+                server.setMulticastAddr(arg);
+                multicastAddr = true;
+                break;
+
+            case Arg::UdpPort:
+                server.setUdpPort(arg);
+                portUdp = true;
+                break;
+
+            case Arg::TcpPort:
+                server.setTcpPort(arg);
+                portTcp = true;
+                break;
+
+            case Arg::FilesList:
+            {
+                std::list<VideoFile> filesToSend;
+                if (args.getFromFile(arg, filesToSend))
+                {
+                    server.setFilesToSend(filesToSend);
+                    files = true;
+                } else
+                {
+                    std::cout << "Wrong video list file." << std::endl;
+                }
+                break;
+            }
+            default:
+                ;
+        }
+    }
+
+    if (portUdp && portTcp && files && interface && multicastAddr)
+    {
+        server.start();
+    } else
+    {
+        showUsage();
+    }
+    return EXIT_SUCCESS;
 }

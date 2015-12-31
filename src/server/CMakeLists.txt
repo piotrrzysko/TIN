@@ -3,8 +3,6 @@ set (server_SRCS
         UDPServer.cpp
         TCPServer.cpp
         TCPServer.hpp
-        VideoFile.hpp
-        VideoFile.cpp
         ServerController.cpp
         ServerController.hpp)
 

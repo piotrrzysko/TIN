@@ -7,13 +7,15 @@
 
 #include "ServerController.hpp"
 
-ServerController::ServerController()
+ServerController::ServerController() : tcpServer(nullptr), udpServer(nullptr)
 {}
 
 ServerController::~ServerController()
 {
-    delete tcpServer;
-    delete udpServer;
+    if (tcpServer != nullptr)
+        delete tcpServer;
+    if (udpServer != nullptr)
+        delete udpServer;
 }
 
 void ServerController::setFilesToSend(std::list<VideoFile> filesToSend)
@@ -70,4 +72,14 @@ bool ServerController::hasClients()
 void ServerController::addFileToQueue(uint fileId)
 {
     udpServer->addFileToQueue(fileId);
+}
+
+std::string ServerController::getUdpPort()
+{
+    return udpPort;
+}
+
+std::string ServerController::getsetMulticastAddr()
+{
+    return multicastAddr;
 }

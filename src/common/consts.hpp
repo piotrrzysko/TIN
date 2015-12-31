@@ -8,6 +8,17 @@
 #ifndef ADVERTCAST_CONSTS_HPP
 #define ADVERTCAST_CONSTS_HPP
 
+namespace ArgsStr {
+    const std::string Usage = "-help";
+    const std::string Port = "-p";
+    const std::string HostName = "-h";
+    const std::string MulticastInterface = "-i";
+    const std::string MulticastAddr = "-m";
+    const std::string UdpPort = "-u";
+    const std::string TcpPort = "-t";
+    const std::string FilesList = "-f";
+}
+
 namespace UdpMessagesTypes {
     const std::string Begin = "BEGIN";
     const std::string Middle = "MIDDLE";

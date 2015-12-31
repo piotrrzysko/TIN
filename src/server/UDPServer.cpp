@@ -21,13 +21,11 @@ UDPServer::UDPServer(std::string multicastAddr, std::string multicastInterface, 
 
 void UDPServer::start()
 {
-    // TODO: Przerobic na kolejke blokujaca
     while(true)
     {
-        if(parent->hasClients() && !filesToSendQueue.empty())
+        if(parent->hasClients())
         {
-            VideoFile videofileToSend = filesToSendQueue.top();
-            filesToSendQueue.pop();
+            VideoFile videofileToSend = getFromQueue();
 
             std::ifstream videoFile;
             videoFile.open(videofileToSend.getLocalPath());
@@ -40,12 +38,13 @@ void UDPServer::start()
                 memset(bytesFromFile, 0, maxDataSize);
                 videoFile.read(bytesFromFile, maxDataSize);
 
+                std::string bytesStr(bytesFromFile, videoFile.gcount());
                 if (isBegin)
                 {
-                    sendDatagram(datagramNumber, videofileToSend.getId(), UdpMessagesTypes::Begin, bytesFromFile);
+                    sendDatagram(datagramNumber, videofileToSend.getId(), UdpMessagesTypes::Begin, bytesStr);
                 } else
                 {
-                    sendDatagram(datagramNumber, videofileToSend.getId(), UdpMessagesTypes::Middle, bytesFromFile);
+                    sendDatagram(datagramNumber, videofileToSend.getId(), UdpMessagesTypes::Middle, bytesStr);
                 }
                 isBegin = false;
                 datagramNumber++;
@@ -68,12 +67,30 @@ void UDPServer::addFiles(std::list<VideoFile> filesToSend)
 
 void UDPServer::addFileToQueue(uint fileId)
 {
+    std::unique_lock<std::mutex> mlock(mutex);
     if (videoFiles.find(fileId) != videoFiles.end())
     {
         VideoFile videoToQueue = videoFiles[fileId];
         videoToQueue.setId(fileId);
         filesToSendQueue.push(videoToQueue);
+        mlock.unlock();
+        cond.notify_one();
+    } else
+    {
+        mlock.unlock();
     }
+}
+
+VideoFile UDPServer::getFromQueue()
+{
+    std::unique_lock<std::mutex> mlock(mutex);
+    while (filesToSendQueue.empty())
+    {
+        cond.wait(mlock);
+    }
+    VideoFile item = filesToSendQueue.top();
+    filesToSendQueue.pop();
+    return item;
 }
 
 bool UDPServer::initServer(std::string multicastAddr, std::string multicastInterface, std::string port)
@@ -85,20 +102,20 @@ bool UDPServer::initServer(std::string multicastAddr, std::string multicastInter
     sockfd = socketFactory.createSocket(multicastAddr, port, AF_UNSPEC, SOCK_DGRAM, &addr, false);
     if (sockfd == -1)
     {
-        perror("createSocket error::");
-        logger::error << "createSocket error::\n";
+        logger::error << "Creating socket error.\n";
         return false;
     }
 
-    if (!multicastUtils.isMulticastAddress(&addr)<0)
+    if (!multicastUtils.isMulticastAddress(&addr) < 0)
     {
-        logger::error << "Bledy adres multicast.\n";
+        logger::error << "Wrong multicast address.\n";
+        close(sockfd);
         return false;
     }
 
-    if (!multicastUtils.setMulticastInterface(sockfd, multicastInterface, &addr)<0)
+    if (!multicastUtils.setMulticastInterface(sockfd, multicastInterface, &addr) < 0)
     {
-        logger::error << "Setting local interface error\n";
+        logger::error << "Setting local interface error.\n";
         close(sockfd);
         return false;
     }
@@ -111,12 +128,11 @@ bool UDPServer::sendDatagram(uint datagramNumber, uint fileId, std::string type,
     std::stringstream ss("");
 
     ss << type << " " << fileId << " " << datagramNumber << "\n" << data;
-
     memset(datagram, 0, MAX_DATAGRAM_SIZE);
     memcpy(datagram, ss.str().c_str(), ss.str().size());
     if (sendto(sockfd, datagram, MAX_DATAGRAM_SIZE, 0, (struct sockaddr *)&addr, sizeof(addr)) == -1)
     {
-        logger::error << "sendto error\n";
+        logger::error << "Error in sendto function.\n";
         return false;
     }
     return true;

@@ -26,6 +26,7 @@ public:
     // UDP client
     void setMulticastAddr(std::string multicastAddr);
     void setUdpPort(std::string udpPort);
+    void startUdpClientThread();
 
     // TCP client
     void setTcpPort(std::string tcpPort);
@@ -38,8 +39,8 @@ public:
     void start();
 
 private:
-    UDPClient *udpClient;
     TCPClient *tcpClient;
+    UDPClient *udpClient;
 
     uint clientId;
 

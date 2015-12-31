@@ -26,7 +26,7 @@ public:
     bool matchNAK(const std::string &msg, uint &clientId, uint &fileId);
     bool matchReport(const std::string &msg, uint &clientId, std::string &data);
     bool matchConnect(const std::string &msg);
-    bool matchClient(const std::string &msg, uint &clientId);
+    bool matchClient(const std::string &msg, uint &clientId, std::string &multicastAddr, std::string &multicastPort);
 
 private:
     bool parse(const std::string expectedType, const std::string &datagram, uint &fileId,

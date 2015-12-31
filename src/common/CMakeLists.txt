@@ -6,6 +6,9 @@ set (common_SRCS
         SocketFactory.hpp
         Parser.cpp
         Parser.hpp
-        )
+        Args.cpp
+        Args.hpp
+        VideoFile.hpp
+        VideoFile.cpp)
 
 add_library (common ${common_SRCS})

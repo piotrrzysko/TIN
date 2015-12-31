@@ -6,13 +6,55 @@
  */
 
 #include "ClientController.hpp"
+#include "../common/Args.hpp"
+
+void showUsage()
+{
+    std::cout << "Usage: ./client -h SERVER_NAME -p PORT" << std::endl;
+}
 
 int main(int argc, char** argv)
 {
     ClientController client;
-    client.setTcpPort("5555");
-    client.setTcpServerName("10.1.1.1");
-    client.setUdpPort("8888");
-    client.setMulticastAddr("224.0.0.1");
-    client.start();
+    bool port = false, serverName = false;
+
+    if (argc != 5)
+    {
+        showUsage();
+        return EXIT_SUCCESS;
+    }
+
+    Args args(argc, argv);
+    while(!args.isEnd())
+    {
+        std::string arg;
+        switch (args.getNext(arg))
+        {
+            case Arg::Undefined:
+            case Arg::Usage:
+                showUsage();
+                return EXIT_SUCCESS;
+
+            case Arg::Port:
+                client.setTcpPort(arg);
+                port = true;
+                break;
+
+            case Arg::HostName:
+                client.setTcpServerName(arg);
+                serverName = true;
+                break;
+            default:
+                ;
+        }
+    }
+
+    if (port && serverName)
+    {
+        client.start();
+    } else
+    {
+        showUsage();
+    }
+    return EXIT_SUCCESS;
 }

@@ -36,6 +36,7 @@ private:
     Parser parser;
 
     bool initServer(std::string hostname, std::string port);
+    void handleClientConnection(int connfd, char *clientservice, char *clienthost, sockaddr_storage &clientaddr);
     void handleRequest(const std::string &msg, int connfd);
     void handleConnect(int connfd);
     bool readLine(int fd, std::string* line);

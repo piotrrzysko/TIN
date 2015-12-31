@@ -26,6 +26,8 @@ public:
     void setMulticastAddr(std::string multicastAddr);
     void setMulticastInterface(std::string multicastInterface);
     void setUdpPort(std::string udpPort);
+    std::string getUdpPort();
+    std::string getsetMulticastAddr();
 
     // TCP server
     void setTcpPort(std::string tcpPort);

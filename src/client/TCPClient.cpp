@@ -47,15 +47,19 @@ bool TCPClient::initClient(std::string hostname, std::string port)
 
 void TCPClient::connectToServer()
 {
-    logger::info << "Try connect\n";
     std::stringstream ss("");
     ss << TcpMessagesTypes::Connect << "\n";
     send(ss.str());
 
+    std::string multiAddr;
+    std::string multiPort;
     std::string recMsg = receive();
-    if (parser.matchClient(recMsg, clientId))
+    if (parser.matchClient(recMsg, clientId, multiAddr, multiPort))
     {
+        parent->setMulticastAddr(multiAddr);
+        parent->setUdpPort(multiPort);
         parent->setClientId(clientId);
+        parent->startUdpClientThread();
         logger::info << "Received CLIENT from client_id = [" << clientId << "]\n";
     }
 }

@@ -7,13 +7,15 @@
 
 #include "ClientController.hpp"
 
-ClientController::ClientController()
+ClientController::ClientController() : tcpClient(nullptr), udpClient(nullptr)
 {}
 
 ClientController::~ClientController()
 {
-    delete tcpClient;
-    delete udpClient;
+    if (tcpClient != nullptr)
+        delete tcpClient;
+    if (udpClient != nullptr)
+        delete udpClient;
 }
 
 void ClientController::setMulticastAddr(std::string multicastAddr)
@@ -36,12 +38,9 @@ void ClientController::setTcpServerName(std::string tcpServerName)
     this->tcpServerName = tcpServerName;
 }
 
-void ClientController::start()
-{
+void ClientController::start() {
     std::thread tcpClientThread(&ClientController::startTcpClient, this);
-    std::thread udpClientThread(&ClientController::startUdpClient, this);
     tcpClientThread.join();
-    udpClientThread.join();
 }
 
 void ClientController::startTcpClient()
@@ -70,4 +69,11 @@ void ClientController::sendNAKs(std::vector<uint> fileIds)
 void ClientController::setClientId(uint clientId)
 {
     this->clientId = clientId;
+}
+
+
+void ClientController::startUdpClientThread()
+{
+    std::thread udpClientThread(&ClientController::startUdpClient, this);
+    udpClientThread.detach();
 }

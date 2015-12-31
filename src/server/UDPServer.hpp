@@ -18,8 +18,10 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <mutex>
+#include <condition_variable>
 
-#include "VideoFile.hpp"
+#include "../common/VideoFile.hpp"
 #include "../common/SocketFactory.hpp"
 #include "../common/MulticastUtils.hpp"
 #include "../common/consts.hpp"
@@ -43,9 +45,12 @@ private:
     uint lastFileId;
     std::unordered_map<uint, VideoFile> videoFiles;
     std::priority_queue<VideoFile> filesToSendQueue;
+    std::mutex mutex;
+    std::condition_variable cond;
 
     bool initServer(std::string multicastAddr, std::string multicastInterface, std::string port);
     bool sendDatagram(uint datagramNumber, uint fileId, std::string type, std::string data);
+    VideoFile getFromQueue();
 };
 
 

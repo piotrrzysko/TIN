@@ -34,26 +34,16 @@ void TCPServer::start()
 
         if (connfd >= 0)
         {
-            memset(clienthost, 0, sizeof(clienthost));
-            memset(clientservice, 0, sizeof(clientservice));
-
-            getnameinfo((struct sockaddr *)&clientaddr, addrlen, clienthost, sizeof(clienthost),
-                        clientservice, sizeof(clientservice), NI_NUMERICHOST);
-
-            logger::info << "Received request from host=[" << clienthost << "] port=[" << clientservice << "]\n";
-
-            std::string line;
-            while(readLine(connfd, &line))
-            {
-                handleRequest(line, connfd);
-            }
-            close(connfd);
+            std::thread connectionThread(&TCPServer::handleClientConnection, this, std::ref(connfd),
+                                         std::ref(clientservice), std::ref(clienthost), std::ref(clientaddr));
+            connectionThread.detach();
         } else
         {
-            logger::error << "accept error::\n";
+            logger::error << "Error in accept function.\n";
         }
     }
 }
+
 bool TCPServer::readLine(int fd, std::string* line)
 {
     std::string::iterator pos;
@@ -126,7 +116,7 @@ void TCPServer::handleConnect(int connfd)
     clients.push_back(++lastClientId);
 
     std::stringstream ss("");
-    ss << TcpMessagesTypes::Client << " " << lastClientId << "\n";
+    ss << TcpMessagesTypes::Client << " " << lastClientId << " " << parent->getsetMulticastAddr() << " " << parent->getUdpPort() << "\n";
 
     if (write(connfd, ss.str().c_str(), ss.str().size()) == -1)
     {
@@ -137,4 +127,23 @@ void TCPServer::handleConnect(int connfd)
 bool TCPServer::hasClients()
 {
     return clients.size() > 0;
+}
+
+void TCPServer::handleClientConnection(int connfd, char *clientservice, char *clienthost, sockaddr_storage &clientaddr)
+{
+    socklen_t addrlen = sizeof(clientaddr);
+    memset(clienthost, 0, sizeof(clienthost));
+    memset(clientservice, 0, sizeof(clientservice));
+
+    getnameinfo((struct sockaddr *)&clientaddr, addrlen, clienthost, sizeof(clienthost),
+                clientservice, sizeof(clientservice), NI_NUMERICHOST);
+
+    logger::info << "Received request from host=[" << clienthost << "] port=[" << clientservice << "]\n";
+
+    std::string line;
+    while(readLine(connfd, &line))
+    {
+        handleRequest(line, connfd);
+    }
+    close(connfd);
 }

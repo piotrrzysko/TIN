@@ -13,6 +13,7 @@
 #include <map>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 #include "../common/consts.hpp"
 #include "../common/Logger.hpp"

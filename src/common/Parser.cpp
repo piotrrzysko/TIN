@@ -66,7 +66,7 @@ bool Parser::matchConnect(const std::string &msg)
     return true;
 }
 
-bool Parser::matchClient(const std::string &msg, uint &clientId)
+bool Parser::matchClient(const std::string &msg, uint &clientId, std::string &multicastAddr, std::string &multicastPort)
 {
     std::string s;
     std::stringstream ss(msg);
@@ -75,7 +75,7 @@ bool Parser::matchClient(const std::string &msg, uint &clientId)
     if (s != TcpMessagesTypes::Client)
         return false;
 
-    ss >> clientId;
+    ss >> clientId >> multicastAddr >> multicastPort;
     return !ss.bad();
 }
 

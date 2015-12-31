@@ -27,20 +27,22 @@ void UDPClient::start()
     while(true)
     {
         memset(buffer, 0, sizeof(buffer));
-        if (recvfrom(sockfd, buffer, sizeof(buffer), 0, NULL, 0) == -1)
+        ssize_t bytesRec = 0;
+        if ((bytesRec = recvfrom(sockfd, buffer, sizeof(buffer), 0, NULL, 0)) == -1)
         {
             // TODO: obsluzyc
         } else
         {
+            std::string bufferStr(buffer, bytesRec);
             uint fileId, number;
             std::string data;
             bool isLast = false, wrongDatagram = false;
 
-            if (!datagramParser.matchMiddle(buffer, fileId, number, data))
+            if (!datagramParser.matchMiddle(bufferStr, fileId, number, data))
             {
-                if (!datagramParser.matchBegin(buffer, fileId, number, data))
+                if (!datagramParser.matchBegin(bufferStr, fileId, number, data))
                 {
-                    if (datagramParser.matchEnd(buffer, fileId, number, data))
+                    if (datagramParser.matchEnd(bufferStr, fileId, number, data))
                     {
                         isLast = true;
                     } else
@@ -132,7 +134,6 @@ void UDPClient::manageVideoFiles(uint interval)
             {
                 fileIds.push_back(it->first);
                 logger::warn << "File is expired: file_id = [" << it->first << "]\n";
-                // TODO: dodac komunikat do wyslania do serwera
                 it = videoFiles.erase(it);
             }
             else
