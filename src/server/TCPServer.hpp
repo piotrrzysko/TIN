@@ -21,13 +21,12 @@ class ServerController;
 
 class TCPServer {
 public:
-    TCPServer(std::string hostname, std::string port, ServerController *parent);
+    TCPServer(std::string port, ServerController *parent);
     void start();
     bool hasClients();
 
 private:
     int listenfd;
-    std::string buffer;
 
     std::vector<int> clients;
     int lastClientId;
@@ -35,11 +34,11 @@ private:
     ServerController *parent;
     Parser parser;
 
-    bool initServer(std::string hostname, std::string port);
-    void handleClientConnection(int connfd, char *clientservice, char *clienthost, sockaddr_storage &clientaddr);
+    bool initServer(std::string port);
+    void handleClientConnection(int connfd, sockaddr_storage &clientaddr);
     void handleRequest(const std::string &msg, int connfd);
     void handleConnect(int connfd);
-    bool readLine(int fd, std::string* line);
+    bool readLine(int fd, std::string* line, std::string* buffer);
 };
 
 

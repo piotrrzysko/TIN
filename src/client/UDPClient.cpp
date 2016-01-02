@@ -7,12 +7,12 @@
 
 #include "UDPClient.hpp"
 
-UDPClient::UDPClient(std::string multicastAddr, std::string port, ClientController *parent) : parent(parent)
+UDPClient::UDPClient(std::string multicastAddr, std::string port, ClientController *parent)
+        : succ(0), err(0), parent(parent)
 {
     if (initClient(multicastAddr, port))
     {
         logger::info << "Klient UDP zostal uruchomiony.\n";
-        startVideoFilesManage();
     } else
     {
         logger::error << "Wystapil blad podczas uruchamiania klienta UDP.\n";
@@ -23,8 +23,9 @@ void UDPClient::start()
 {
     Parser datagramParser;
     char buffer[MAX_DATAGRAM_SIZE];
-
-    while(true)
+    isConnected = true;
+    startBackgroundJobs();
+    while(isConnected)
     {
         memset(buffer, 0, sizeof(buffer));
         ssize_t bytesRec = 0;
@@ -36,13 +37,14 @@ void UDPClient::start()
             std::string bufferStr(buffer, bytesRec);
             uint fileId, number;
             std::string data;
+            ulong size;
             bool isLast = false, wrongDatagram = false;
 
-            if (!datagramParser.matchMiddle(bufferStr, fileId, number, data))
+            if (!datagramParser.matchMiddle(bufferStr, fileId, number, size, data))
             {
-                if (!datagramParser.matchBegin(bufferStr, fileId, number, data))
+                if (!datagramParser.matchBegin(bufferStr, fileId, number, size, data))
                 {
-                    if (datagramParser.matchEnd(bufferStr, fileId, number, data))
+                    if (datagramParser.matchEnd(bufferStr, fileId, number, size, data))
                     {
                         isLast = true;
                     } else
@@ -51,36 +53,46 @@ void UDPClient::start()
                     }
                 }
             }
-            if (!wrongDatagram)
-            {
-                logger::info << "Received: datagram_num = [" << number << "] file_id = [" << fileId << "].\n";
-                mutex_files.lock();
-                std::map<uint, ReceivedVideoFile>::iterator it = videoFiles.find(fileId);
-                if (it != videoFiles.end())
-                {
-                    it->second.addData(number, data, isLast);
-                } else
-                {
-                    ReceivedVideoFile file;
-                    file.addData(number, data, isLast);
-                    videoFiles[fileId] = file;
-                    it = videoFiles.find(fileId);
-                }
-                if (it->second.isFull())
-                {
-                    std::string filePath = "./test_" + std::to_string(it->first);
-                    it->second.writeToFile(filePath);
-                    videoFiles.erase(it);
-                    logger::info << "Saved: file_id = [" << fileId << "] to file = [" << filePath << "].\n";
-                }
-                mutex_files.unlock();
-            } else
-            {
-                logger::error << "Wrong datagram.\n";
-            }
+            handleDatagram(wrongDatagram, fileId, number, isLast, data.substr(0, size));
         }
     }
+    logger::info << "UDP Client connection disposed.\n";
+    std::unique_lock<std::mutex> mlock(mutex);
+    isDisposed = true;
+    close(sockfd);
+    cond.notify_one();
+}
 
+void UDPClient::handleDatagram(bool wrongDatagram, uint fileId, uint number, bool isLast, std::string data)
+{
+    if (!wrongDatagram)
+    {
+        logger::info << "Received: datagram_num = [" << number << "] file_id = [" << fileId << "].\n";
+        mutex_files.lock();
+        std::map<uint, ReceivedVideoFile>::iterator it = videoFiles.find(fileId);
+        if (it != videoFiles.end())
+        {
+            it->second.addData(number, data, isLast);
+        } else
+        {
+            ReceivedVideoFile file;
+            file.addData(number, data, isLast);
+            videoFiles[fileId] = file;
+            it = videoFiles.find(fileId);
+        }
+        if (it->second.isFull())
+        {
+            std::string filePath = "./test_" + std::to_string(it->first);
+            it->second.writeToFile(filePath);
+            videoFiles.erase(it);
+            logger::info << "Saved: file_id = [" << fileId << "] to file = [" << filePath << "].\n";
+            succ++;
+        }
+        mutex_files.unlock();
+    } else
+    {
+        logger::error << "Wrong datagram.\n";
+    }
 }
 
 bool UDPClient::initClient(std::string multicastAddr, std::string port)
@@ -115,15 +127,17 @@ bool UDPClient::initClient(std::string multicastAddr, std::string port)
     return true;
 }
 
-void UDPClient::startVideoFilesManage()
+void UDPClient::startBackgroundJobs()
 {
     std::thread t1(&UDPClient::manageVideoFiles, this,  MANAGE_VIDEO_FILES_INTERVAL);
     t1.detach();
+    std::thread t2(&UDPClient::manageReports, this,  MANAGE_REPORTS_INTERVAL);
+    t2.detach();
 }
 
 void UDPClient::manageVideoFiles(uint interval)
 {
-    while(true)
+    while(isConnected)
     {
         mutex_files.lock();
         std::vector<uint> fileIds;
@@ -135,6 +149,7 @@ void UDPClient::manageVideoFiles(uint interval)
                 fileIds.push_back(it->first);
                 logger::warn << "File is expired: file_id = [" << it->first << "]\n";
                 it = videoFiles.erase(it);
+                err++;
             }
             else
             {
@@ -144,5 +159,27 @@ void UDPClient::manageVideoFiles(uint interval)
         mutex_files.unlock();
         parent->sendNAKs(fileIds);
         std::this_thread::sleep_for (std::chrono::seconds(interval));
+    }
+}
+
+void UDPClient::manageReports(uint interval)
+{
+    while(isConnected)
+    {
+        parent->sendReport(succ, err, videoFiles.size());
+        std::this_thread::sleep_for (std::chrono::seconds(interval));
+    }
+}
+
+void UDPClient::dispose()
+{
+    if (isConnected)
+    {
+        isDisposed = false;
+        isConnected = false;
+        std::unique_lock<std::mutex> mlock(mutex);
+        if (!isDisposed)
+            cond.wait(mlock);
+        logger::info << "UDP Client disposed.\n";
     }
 }

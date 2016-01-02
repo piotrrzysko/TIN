@@ -8,9 +8,9 @@
 
 #include "TCPServer.hpp"
 
-TCPServer::TCPServer(std::string hostname, std::string port, ServerController *parent) : lastClientId(0), parent(parent)
+TCPServer::TCPServer(std::string port, ServerController *parent) : lastClientId(0), parent(parent)
 {
-    if (initServer(hostname, port))
+    if (initServer(port))
     {
         logger::info << "Serwer TCP zostal uruchomiony.\n";
     } else
@@ -24,8 +24,6 @@ void TCPServer::start()
     int connfd;
     socklen_t addrlen;
     struct sockaddr_storage clientaddr;
-    char clienthost[NI_MAXHOST];
-    char clientservice[NI_MAXSERV];
 
     while(true)
     {
@@ -34,8 +32,7 @@ void TCPServer::start()
 
         if (connfd >= 0)
         {
-            std::thread connectionThread(&TCPServer::handleClientConnection, this, std::ref(connfd),
-                                         std::ref(clientservice), std::ref(clienthost), std::ref(clientaddr));
+            std::thread connectionThread(&TCPServer::handleClientConnection, this, connfd, std::ref(clientaddr));
             connectionThread.detach();
         } else
         {
@@ -44,34 +41,34 @@ void TCPServer::start()
     }
 }
 
-bool TCPServer::readLine(int fd, std::string* line)
+bool TCPServer::readLine(int fd, std::string* line, std::string* buffer)
 {
     std::string::iterator pos;
-    while ((pos = find(buffer.begin(), buffer.end(), '\n')) == buffer.end())
+    while ((pos = find(buffer->begin(), buffer->end(), '\n')) == buffer->end())
     {
         char buf [1025];
         ssize_t n = read (fd, buf, 1024);
         if (n == -1)
         {
-            *line = buffer;
-            buffer = "";
+            *line = *buffer;
+            *buffer = "";
             return false;
         }
         buf [n] = 0;
-        buffer += buf;
+        *buffer += buf;
     }
-    *line = std::string(buffer.begin(), pos);
-    buffer = std::string(pos + 1, buffer.end());
+    *line = std::string(buffer->begin(), pos);
+    *buffer = std::string(pos + 1, buffer->end());
     return true;
 }
 
-bool TCPServer::initServer(std::string hostname, std::string port)
+bool TCPServer::initServer(std::string port)
 {
     SocketFactory socketFactory;
     struct sockaddr_storage addr;
 
     memset(&addr, 0, sizeof(addr));
-    listenfd = socketFactory.createSocket(hostname, port, AF_UNSPEC, SOCK_STREAM, &addr, false);
+    listenfd = socketFactory.createSocket("", port, AF_UNSPEC, SOCK_STREAM, &addr, false);
     if (listenfd == -1)
     {
         perror("createSocket error::");
@@ -90,16 +87,16 @@ bool TCPServer::initServer(std::string hostname, std::string port)
 
 void TCPServer::handleRequest(const std::string &msg, int connfd)
 {
-    uint clientId, fileId;
-    std::string data;
+    uint clientId, fileId, succ, err, buff;
 
     if (parser.matchNAK(msg, clientId, fileId))
     {
         logger::info << "Received NAK from client_id = [" << clientId << "] file_id = [" << fileId << "].\n";
         parent->addFileToQueue(fileId);
-    } else if (parser.matchReport(msg, clientId, data))
+    } else if (parser.matchReport(msg, clientId, succ, err, buff))
     {
-        logger::info << "Received REPORT from client_id = [" << clientId << "] data = [" << data << "].\n";
+        logger::info << "Received REPORT from client_id = [" << clientId << "] succ = [" << succ
+            << "] err = [" << buff << "] buff = [" << buff << "].\n";
     } else if (parser.matchConnect(msg))
     {
         logger::info << "Received CONNECT.\n";
@@ -129,8 +126,11 @@ bool TCPServer::hasClients()
     return clients.size() > 0;
 }
 
-void TCPServer::handleClientConnection(int connfd, char *clientservice, char *clienthost, sockaddr_storage &clientaddr)
+void TCPServer::handleClientConnection(int connfd, sockaddr_storage &clientaddr)
 {
+    char clienthost[NI_MAXHOST];
+    char clientservice[NI_MAXSERV];
+
     socklen_t addrlen = sizeof(clientaddr);
     memset(clienthost, 0, sizeof(clienthost));
     memset(clientservice, 0, sizeof(clientservice));
@@ -140,8 +140,9 @@ void TCPServer::handleClientConnection(int connfd, char *clientservice, char *cl
 
     logger::info << "Received request from host=[" << clienthost << "] port=[" << clientservice << "]\n";
 
+    std::string buffer;
     std::string line;
-    while(readLine(connfd, &line))
+    while(readLine(connfd, &line, &buffer))
     {
         handleRequest(line, connfd);
     }

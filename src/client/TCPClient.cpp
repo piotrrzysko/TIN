@@ -8,26 +8,25 @@
 #include "TCPClient.hpp"
 
 
-TCPClient::TCPClient(std::string hostname, std::string port, ClientController *parent) : parent(parent)
-{
-    if (initClient(hostname, port))
-    {
-        logger::info << "Klient TCP zostal uruchomiony.\n";
-    } else
-    {
-        logger::error << "Wystapil blad podczas uruchamiania klienta TCP.\n";
-    }
-}
+TCPClient::TCPClient(std::string hostname, std::string port, ClientController *parent)
+        : hostname(hostname), port(port), isConnected(false), parent(parent)
+{}
 
 void TCPClient::start()
 {
     connectToServer();
     while(true)
     {
-        std::string msg = getFromQueue();
-        if (msg != "")
+        if(!send(getFromQueue()))
         {
-            send(msg);
+            isConnected = false;
+            parent->disposeUdpClientThread();
+            close(sockfd);
+            mutexMsgs.lock();
+            std::queue<std::string> empty;
+            std::swap(msgsToSend, empty);
+            mutexMsgs.unlock();
+            connectToServer();
         }
     }
 }
@@ -38,67 +37,85 @@ bool TCPClient::initClient(std::string hostname, std::string port)
     sockfd = socketFactory.createSocket(hostname, port, AF_UNSPEC, SOCK_STREAM, nullptr, true);
     if (sockfd == -1)
     {
-        perror("connect error::");
-        logger::error << "connect error::\n";
         return false;
     }
+    signal(SIGPIPE, SIG_IGN);
     return true;
 }
 
 void TCPClient::connectToServer()
 {
-    std::stringstream ss("");
-    ss << TcpMessagesTypes::Connect << "\n";
-    send(ss.str());
-
-    std::string multiAddr;
-    std::string multiPort;
-    std::string recMsg = receive();
-    if (parser.matchClient(recMsg, clientId, multiAddr, multiPort))
+    while (!tryConnectToServer())
     {
-        parent->setMulticastAddr(multiAddr);
-        parent->setUdpPort(multiPort);
-        parent->setClientId(clientId);
-        parent->startUdpClientThread();
-        logger::info << "Received CLIENT from client_id = [" << clientId << "]\n";
+        logger::error << "Error connecting to TCP server. Trying again...\n";
+        std::this_thread::sleep_for (std::chrono::seconds(RECONNECT_INTERVAL));
     }
 }
 
-void TCPClient::send(const std::string &msg)
+bool TCPClient::tryConnectToServer()
 {
-    if (write(sockfd, msg.c_str(), msg.size()) == -1)
+    logger::info << "Connecting to TCP server...\n";
+    if (initClient(hostname, port))
     {
-        logger::error << "writing on stream socket\n";
+        isConnected = true;
+        logger::info << "Connected to TCP server.\n";
+
+        std::stringstream ss("");
+        ss << TcpMessagesTypes::Connect << "\n";
+        send(ss.str());
+
+        std::string multiAddr;
+        std::string multiPort;
+        std::string recMsg = receive();
+        if (parser.matchClient(recMsg, clientId, multiAddr, multiPort))
+        {
+            parent->setMulticastAddr(multiAddr);
+            parent->setUdpPort(multiPort);
+            parent->setClientId(clientId);
+            parent->startUdpClientThread();
+            logger::info << "Received CLIENT from client_id = [" << clientId << "]\n";
+            return true;
+        }
+    } else
+    {
+        isConnected = false;
     }
+    return false;
+}
+
+bool TCPClient::send(const std::string &msg)
+{
+    if (msg != "")
+    {
+        if (write(sockfd, msg.c_str(), msg.size()) == -1)
+        {
+            logger::error << "Error when writing on stream socket.\n";
+            return false;
+        }
+    }
+    return true;
 }
 
 std::string TCPClient::receive()
 {
-    ssize_t rval;
     char buf[BUFFER_SIZE];
 
     memset(buf, 0, sizeof buf);
-    if ((rval = read(sockfd, buf, BUFFER_SIZE)) == -1)
+    if (read(sockfd, buf, BUFFER_SIZE) == -1)
     {
-        logger::error << "reading stream message\n";
+        logger::error << "Error when reading stream message.\n";
     }
-    if (rval == 0)
-    {
-        logger::info << "Ending connection\n";
-    }
-    else
-    {
-        logger::info << "-->" << buf << "\n";
-    }
-
     return buf;
 }
 
 void TCPClient::addToQueue(const std::string &msg)
 {
-    mutexMsgs.lock();
-    msgsToSend.push(msg);
-    mutexMsgs.unlock();
+    if (isConnected)
+    {
+        mutexMsgs.lock();
+        msgsToSend.push(msg);
+        mutexMsgs.unlock();
+    }
 }
 
 std::string TCPClient::getFromQueue()

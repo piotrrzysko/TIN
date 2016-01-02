@@ -27,12 +27,14 @@ public:
     void setMulticastAddr(std::string multicastAddr);
     void setUdpPort(std::string udpPort);
     void startUdpClientThread();
+    void disposeUdpClientThread();
 
     // TCP client
     void setTcpPort(std::string tcpPort);
     void setTcpServerName(std::string tcpServerName);
 
     void sendNAKs(std::vector<uint> fileIds);
+    void sendReport(uint succ, uint err, uint buff);
 
     void setClientId(uint clientId);
 

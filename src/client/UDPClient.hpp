@@ -16,6 +16,8 @@
 #include <thread>
 #include <mutex>
 #include <vector>
+#include <condition_variable>
+#include <atomic>
 
 #include "../common/MulticastUtils.hpp"
 #include "../common/SocketFactory.hpp"
@@ -30,17 +32,28 @@ class UDPClient {
 public:
     UDPClient(std::string multicastAddr, std::string port, ClientController *parent);
     void start();
+    void dispose();
 
 private:
     int sockfd;
+
+    uint succ;
+    uint err;
 
     mutable std::mutex mutex_files;
     std::map<uint, ReceivedVideoFile> videoFiles;
     ClientController *parent;
 
+    bool isDisposed;
+    std::atomic<bool> isConnected;
+    std::mutex mutex;
+    std::condition_variable cond;
+
     bool initClient(std::string multicastAddr, std::string port);
     void manageVideoFiles(uint interval);
-    void startVideoFilesManage();
+    void startBackgroundJobs();
+    void manageReports(uint interval);
+    void handleDatagram(bool wrongDatagram, uint fileId, uint number, bool isLast, std::string data);
 };
 
 

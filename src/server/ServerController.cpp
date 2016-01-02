@@ -60,13 +60,8 @@ void ServerController::startUdpServer()
 
 void ServerController::startTcpServer()
 {
-    tcpServer = new TCPServer("", tcpPort, this);
+    tcpServer = new TCPServer(tcpPort, this);
     tcpServer->start();
-}
-
-bool ServerController::hasClients()
-{
-    return tcpServer->hasClients();
 }
 
 void ServerController::addFileToQueue(uint fileId)

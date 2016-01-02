@@ -34,7 +34,6 @@ public:
 
     void start();
 
-    bool hasClients();
     void addFileToQueue(uint fileId);
 
 private:

@@ -7,19 +7,19 @@
 
 #include "Parser.hpp"
 
-bool Parser::matchBegin(const std::string &datagram, uint &fileId, uint &number, std::string &data)
+bool Parser::matchBegin(const std::string &datagram, uint &fileId, uint &number, ulong &size, std::string &data)
 {
-    return parse(UdpMessagesTypes::Begin, datagram, fileId, number, data);
+    return parse(UdpMessagesTypes::Begin, datagram, fileId, number, size, data);
 }
 
-bool Parser::matchEnd(const std::string &datagram, uint &fileId, uint &number, std::string &data)
+bool Parser::matchEnd(const std::string &datagram, uint &fileId, uint &number, ulong &size, std::string &data)
 {
-    return parse(UdpMessagesTypes::End, datagram, fileId, number, data);
+    return parse(UdpMessagesTypes::End, datagram, fileId, number, size, data);
 }
 
-bool Parser::matchMiddle(const std::string &datagram, uint &fileId, uint &number, std::string &data)
+bool Parser::matchMiddle(const std::string &datagram, uint &fileId, uint &number, ulong &size, std::string &data)
 {
-    return parse(UdpMessagesTypes::Middle, datagram, fileId, number, data);
+    return parse(UdpMessagesTypes::Middle, datagram, fileId, number, size, data);
 }
 
 bool Parser::matchNAK(const std::string &msg, uint &clientId, uint &fileId)
@@ -35,7 +35,7 @@ bool Parser::matchNAK(const std::string &msg, uint &clientId, uint &fileId)
     return !ss.bad();
 }
 
-bool Parser::matchReport(const std::string &msg, uint &clientId, std::string &data)
+bool Parser::matchReport(const std::string &msg, uint &clientId, uint &succ, uint &err, uint &buff)
 {
     std::string s;
     std::stringstream ss(msg);
@@ -44,14 +44,7 @@ bool Parser::matchReport(const std::string &msg, uint &clientId, std::string &da
     if (s != TcpMessagesTypes::Report)
         return false;
 
-    ss >> clientId;
-    size_t index = msg.find("\n");
-    if (index == std::string::npos)
-    {
-        logger::error << "Invalid data\n";
-        return false;
-    }
-    data = msg.substr(index + 1);
+    ss >> clientId >> succ >> err >> buff;
     return !ss.bad();
 }
 
@@ -80,7 +73,7 @@ bool Parser::matchClient(const std::string &msg, uint &clientId, std::string &mu
 }
 
 bool Parser::parse(const std::string expectedType, const std::string &datagram, uint &fileId,
-           uint &number, std::string &data)
+           uint &number, ulong &size, std::string &data)
 {
     std::string s;
     std::stringstream ss(datagram);
@@ -89,13 +82,13 @@ bool Parser::parse(const std::string expectedType, const std::string &datagram, 
     if (s != expectedType)
         return false;
 
-    ss >> fileId >> number;
-    size_t index = datagram.find("\n");
-    if (index == std::string::npos)
+    ss >> fileId >> number >> size;
+    size_t newLineIndex = datagram.find("\n");
+    if (newLineIndex == std::string::npos)
     {
         logger::error << "Invalid data\n";
         return false;
     }
-    data = datagram.substr(index + 1);
+    data = datagram.substr(newLineIndex + 1);
     return !ss.bad();
 }

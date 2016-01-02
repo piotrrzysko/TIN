@@ -11,6 +11,7 @@
 
 #include <queue>
 #include <mutex>
+#include <csignal>
 
 #include "../common/Logger.hpp"
 #include "../common/SocketFactory.hpp"
@@ -30,6 +31,9 @@ private:
     int sockfd;
 
     uint clientId;
+    std::string hostname;
+    std::string port;
+    std::atomic<bool> isConnected;
 
     mutable std::mutex mutexMsgs;
     std::queue<std::string> msgsToSend;
@@ -38,8 +42,9 @@ private:
     Parser parser;
 
     bool initClient(std::string hostname, std::string port);
+    bool tryConnectToServer();
     void connectToServer();
-    void send(const std::string &msg);
+    bool send(const std::string &msg);
     std::string receive();
 
     std::string getFromQueue();

@@ -77,3 +77,21 @@ void ClientController::startUdpClientThread()
     std::thread udpClientThread(&ClientController::startUdpClient, this);
     udpClientThread.detach();
 }
+
+void ClientController::sendReport(uint succ, uint err, uint buff)
+{
+    std::stringstream ss("");
+
+    ss << TcpMessagesTypes::Report << " " << clientId << " " << succ << " " << err << " " << buff << "\n";
+    tcpClient->addToQueue(ss.str());
+}
+
+void ClientController::disposeUdpClientThread()
+{
+    if (udpClient != nullptr)
+    {
+        logger::info << "Try dispose UDP Client.\n";
+        udpClient->dispose();
+        delete udpClient;
+    }
+}
