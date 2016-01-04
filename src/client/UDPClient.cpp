@@ -38,13 +38,14 @@ void UDPClient::start()
             uint fileId, number;
             std::string data;
             ulong size;
+            std::time_t timestamp;
             bool isLast = false, wrongDatagram = false;
 
-            if (!datagramParser.matchMiddle(bufferStr, fileId, number, size, data))
+            if (!datagramParser.matchMiddle(bufferStr, fileId, number, timestamp, size, data))
             {
-                if (!datagramParser.matchBegin(bufferStr, fileId, number, size, data))
+                if (!datagramParser.matchBegin(bufferStr, fileId, number, timestamp, size, data))
                 {
-                    if (datagramParser.matchEnd(bufferStr, fileId, number, size, data))
+                    if (datagramParser.matchEnd(bufferStr, fileId, number, timestamp, size, data))
                     {
                         isLast = true;
                     } else
@@ -53,7 +54,7 @@ void UDPClient::start()
                     }
                 }
             }
-            handleDatagram(wrongDatagram, fileId, number, isLast, data.substr(0, size));
+            handleDatagram(wrongDatagram, fileId, number, isLast, data.substr(0, size),timestamp);
         }
     }
     logger::info << "UDP Client connection disposed.\n";
@@ -63,7 +64,7 @@ void UDPClient::start()
     cond.notify_one();
 }
 
-void UDPClient::handleDatagram(bool wrongDatagram, uint fileId, uint number, bool isLast, std::string data)
+void UDPClient::handleDatagram(bool wrongDatagram, uint fileId, uint number, bool isLast, std::string data, std::time_t timestamp)
 {
     if (!wrongDatagram)
     {
@@ -72,11 +73,11 @@ void UDPClient::handleDatagram(bool wrongDatagram, uint fileId, uint number, boo
         std::map<uint, ReceivedVideoFile>::iterator it = videoFiles.find(fileId);
         if (it != videoFiles.end())
         {
-            it->second.addData(number, data, isLast);
+            it->second.addData(number, data, isLast, timestamp);
         } else
         {
             ReceivedVideoFile file;
-            file.addData(number, data, isLast);
+            file.addData(number, data, isLast, timestamp);
             videoFiles[fileId] = file;
             it = videoFiles.find(fileId);
         }
@@ -148,7 +149,8 @@ void UDPClient::manageVideoFiles(uint interval)
             {
                 fileIds.push_back(it->first);
                 logger::warn << "File is expired: file_id = [" << it->first << "]\n";
-                it = videoFiles.erase(it);
+                if(it->second.getTimestamp() < time(0))
+                    it = videoFiles.erase(it);
                 err++;
             }
             else

@@ -40,15 +40,15 @@ void UDPServer::start()
             std::string bytesStr(bytesFromFile, videoFile.gcount());
             if (isBegin)
             {
-                sendDatagram(datagramNumber, videofileToSend.getId(), UdpMessagesTypes::Begin, bytesStr);
+                sendDatagram(datagramNumber, videofileToSend.getId(), UdpMessagesTypes::Begin, bytesStr,videofileToSend.getTimestamp());
             } else
             {
-                sendDatagram(datagramNumber, videofileToSend.getId(), UdpMessagesTypes::Middle, bytesStr);
+                sendDatagram(datagramNumber, videofileToSend.getId(), UdpMessagesTypes::Middle, bytesStr,videofileToSend.getTimestamp());
             }
             isBegin = false;
             datagramNumber++;
         }
-        sendDatagram(datagramNumber, videofileToSend.getId(), UdpMessagesTypes::End, "");
+        sendDatagram(datagramNumber, videofileToSend.getId(), UdpMessagesTypes::End, "", videofileToSend.getTimestamp());
         videoFile.close();
     }
 }
@@ -120,12 +120,12 @@ bool UDPServer::initServer(std::string multicastAddr, std::string multicastInter
     return true;
 }
 
-bool UDPServer::sendDatagram(uint datagramNumber, uint fileId, std::string type, std::string data)
+bool UDPServer::sendDatagram(uint datagramNumber, uint fileId, std::string type, std::string data, std::time_t timestamp)
 {
     char datagram[MAX_DATAGRAM_SIZE];
     std::stringstream ss("");
 
-    ss << type << " " << fileId << " " << datagramNumber << " " << data.size() << "\n" << data;
+    ss << type << " " << fileId << " " << datagramNumber << " " << timestamp << " " << data.size() << "\n" << data;
     memset(datagram, 0, MAX_DATAGRAM_SIZE);
     memcpy(datagram, ss.str().c_str(), ss.str().size());
     if (sendto(sockfd, datagram, MAX_DATAGRAM_SIZE, 0, (struct sockaddr *)&addr, sizeof(addr)) == -1)

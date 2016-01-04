@@ -23,14 +23,16 @@ public:
     ReceivedVideoFile();
 
     bool isFull();
-    void addData(uint datagramNumber, std::string &data, bool isLast);
+    void addData(uint datagramNumber, std::string &data, bool isLast, std::time_t timestamp);
     bool writeToFile(const std::string &filepath);
     bool isExpired();
+    std:: time_t getTimestamp();
 
 private:
     std::map<uint, std::string> file;
     uint lastDatagramNumber;
     std::chrono::time_point<std::chrono::system_clock> lastModification;
+    std::time_t timestamp;
 };
 
 

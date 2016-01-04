@@ -7,19 +7,19 @@
 
 #include "Parser.hpp"
 
-bool Parser::matchBegin(const std::string &datagram, uint &fileId, uint &number, ulong &size, std::string &data)
+bool Parser::matchBegin(const std::string &datagram, uint &fileId, uint &number, std::time_t timestamp, ulong &size, std::string &data)
 {
-    return parse(UdpMessagesTypes::Begin, datagram, fileId, number, size, data);
+    return parse(UdpMessagesTypes::Begin, datagram, fileId, number, timestamp, size, data);
 }
 
-bool Parser::matchEnd(const std::string &datagram, uint &fileId, uint &number, ulong &size, std::string &data)
+bool Parser::matchEnd(const std::string &datagram, uint &fileId, uint &number, std::time_t timestamp, ulong &size, std::string &data)
 {
-    return parse(UdpMessagesTypes::End, datagram, fileId, number, size, data);
+    return parse(UdpMessagesTypes::End, datagram, fileId, number, timestamp, size, data);
 }
 
-bool Parser::matchMiddle(const std::string &datagram, uint &fileId, uint &number, ulong &size, std::string &data)
+bool Parser::matchMiddle(const std::string &datagram, uint &fileId, uint &number, std::time_t timestamp, ulong &size, std::string &data)
 {
-    return parse(UdpMessagesTypes::Middle, datagram, fileId, number, size, data);
+    return parse(UdpMessagesTypes::Middle, datagram, fileId, number, timestamp, size, data);
 }
 
 bool Parser::matchNAK(const std::string &msg, uint &clientId, uint &fileId)
@@ -73,7 +73,7 @@ bool Parser::matchClient(const std::string &msg, uint &clientId, std::string &mu
 }
 
 bool Parser::parse(const std::string expectedType, const std::string &datagram, uint &fileId,
-           uint &number, ulong &size, std::string &data)
+           uint &number, std::time_t timestamp, ulong &size, std::string &data)
 {
     std::string s;
     std::stringstream ss(datagram);
@@ -82,7 +82,7 @@ bool Parser::parse(const std::string expectedType, const std::string &datagram, 
     if (s != expectedType)
         return false;
 
-    ss >> fileId >> number >> size;
+    ss >> fileId >> number >> timestamp >> size;
     size_t newLineIndex = datagram.find("\n");
     if (newLineIndex == std::string::npos)
     {

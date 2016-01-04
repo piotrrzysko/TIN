@@ -17,12 +17,13 @@ bool ReceivedVideoFile::isFull()
     return file.size() == lastDatagramNumber;
 }
 
-void ReceivedVideoFile::addData(uint datagramNumber, std::string &data, bool isLast)
+void ReceivedVideoFile::addData(uint datagramNumber, std::string &data, bool isLast, std::time_t timestamp)
 {
     lastModification = std::chrono::system_clock::now();
     if (isLast)
         lastDatagramNumber = datagramNumber;
     file[datagramNumber] = data;
+    timestamp = timestamp;
 }
 
 bool ReceivedVideoFile::writeToFile(const std::string &filepath)
@@ -46,4 +47,9 @@ bool ReceivedVideoFile::isExpired()
     std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
     std::chrono::time_point<std::chrono::system_clock> expiration = lastModification + std::chrono::seconds(FILE_EXPIRATION_TIME_SEC);
     return start > expiration;
+}
+
+std:: time_t ReceivedVideoFile::getTimestamp()
+{
+    return timestamp;
 }

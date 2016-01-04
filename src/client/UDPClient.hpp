@@ -53,7 +53,7 @@ private:
     void manageVideoFiles(uint interval);
     void startBackgroundJobs();
     void manageReports(uint interval);
-    void handleDatagram(bool wrongDatagram, uint fileId, uint number, bool isLast, std::string data);
+    void handleDatagram(bool wrongDatagram, uint fileId, uint number, bool isLast, std::string data, std::time_t timestamp);
 };
 
 

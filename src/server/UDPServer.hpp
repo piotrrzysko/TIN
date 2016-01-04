@@ -49,7 +49,7 @@ private:
     std::condition_variable cond;
 
     bool initServer(std::string multicastAddr, std::string multicastInterface, std::string port);
-    bool sendDatagram(uint datagramNumber, uint fileId, std::string type, std::string data);
+    bool sendDatagram(uint datagramNumber, uint fileId, std::string type, std::string data, std::time_t timestamp);
     VideoFile getFromQueue();
 };
 
