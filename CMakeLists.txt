@@ -8,5 +8,6 @@ set (EXECUTABLE_OUTPUT_PATH "${AdvertCast_BINARY_DIR}/bin")
 set (LIBRARY_OUTPUT_PATH "${AdvertCast_BINARY_DIR}/lib")
 
 add_subdirectory (src)
+add_subdirectory (tests)
 
 install (DIRECTORY data DESTINATION "${AdvertCast_BINARY_DIR}")

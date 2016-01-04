@@ -7,4 +7,5 @@ set (client_SRCS
 
 find_package(Threads REQUIRED)
 add_executable (client ${client_SRCS})
+set_target_properties(client PROPERTIES ENABLE_EXPORTS true)
 target_link_libraries (client common ${CMAKE_THREAD_LIBS_INIT})
