@@ -23,7 +23,7 @@ void ReceivedVideoFile::addData(uint datagramNumber, std::string &data, bool isL
     if (isLast)
         lastDatagramNumber = datagramNumber;
     file[datagramNumber] = data;
-    timestamp = timestamp;
+    this->timestamp = timestamp;
 }
 
 bool ReceivedVideoFile::writeToFile(const std::string &filepath)

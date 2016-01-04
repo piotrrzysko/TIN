@@ -32,7 +32,7 @@ namespace TcpMessagesTypes {
     const std::string Client = "CLIENT";
 }
 
-#define DATAGRAM_CUSTOM_HEADER_SIZE 40
+#define DATAGRAM_CUSTOM_HEADER_SIZE 50
 #define MAX_DATAGRAM_SIZE 65507
 
 #define MAX_LISTEN_QUEUE 128

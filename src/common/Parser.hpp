@@ -19,9 +19,9 @@
 class Parser {
 public:
     // UDP
-    bool matchBegin(const std::string &datagram, uint &fileId, uint &number, std::time_t timestamp, ulong &size, std::string &data);
-    bool matchEnd(const std::string &datagram, uint &fileId, uint &number, std::time_t timestamp, ulong &size, std::string &data);
-    bool matchMiddle(const std::string &datagram, uint &fileId, uint &number, std::time_t timestamp, ulong &size, std::string &data);
+    bool matchBegin(const std::string &datagram, uint &fileId, uint &number, std::time_t &timestamp, ulong &size, std::string &data);
+    bool matchEnd(const std::string &datagram, uint &fileId, uint &number, std::time_t &timestamp, ulong &size, std::string &data);
+    bool matchMiddle(const std::string &datagram, uint &fileId, uint &number, std::time_t &timestamp, ulong &size, std::string &data);
 
     // TCP
     bool matchNAK(const std::string &msg, uint &clientId, uint &fileId);
@@ -31,7 +31,7 @@ public:
 
 private:
     bool parse(const std::string expectedType, const std::string &datagram, uint &fileId,
-               uint &number, std::time_t timestamp, ulong &size, std::string &data);
+               uint &number, std::time_t &timestamp, ulong &size, std::string &data);
 };
 
 

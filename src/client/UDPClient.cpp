@@ -54,7 +54,7 @@ void UDPClient::start()
                     }
                 }
             }
-            handleDatagram(wrongDatagram, fileId, number, isLast, data.substr(0, size),timestamp);
+            handleDatagram(wrongDatagram, fileId, number, isLast, data.substr(0, size), timestamp);
         }
     }
     logger::info << "UDP Client connection disposed.\n";
@@ -68,7 +68,7 @@ void UDPClient::handleDatagram(bool wrongDatagram, uint fileId, uint number, boo
 {
     if (!wrongDatagram)
     {
-        logger::info << "Received: datagram_num = [" << number << "] file_id = [" << fileId << "].\n";
+        logger::info << "Received: datagram_num = [" << number << "] file_id = [" << fileId << "] timestamp = [" << timestamp << "].\n";
         mutex_files.lock();
         std::map<uint, ReceivedVideoFile>::iterator it = videoFiles.find(fileId);
         if (it != videoFiles.end())
@@ -147,10 +147,17 @@ void UDPClient::manageVideoFiles(uint interval)
         {
             if (it->second.isExpired())
             {
-                fileIds.push_back(it->first);
                 logger::warn << "File is expired: file_id = [" << it->first << "]\n";
                 if(it->second.getTimestamp() < time(0))
+                {
                     it = videoFiles.erase(it);
+                    logger::warn << "Removed expired file: file_id = [" << it->first << "]\n";
+                }
+                else
+                {
+                    fileIds.push_back(it->first);
+                    ++it;
+                }
                 err++;
             }
             else
