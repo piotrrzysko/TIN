@@ -11,7 +11,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
 
 if (COVERALLS)
     include(Coveralls)
-    coveralls_turn_on_coverage()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -lgcov -fprofile-arcs -ftest-coverage")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -lgcov -fprofile-arcs -ftest-coverage")
 endif()
 
 include_directories (${AdvertCast_SOURCE_DIR}/src)
