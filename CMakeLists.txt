@@ -31,6 +31,8 @@ if (COVERALLS)
             "${cov_SRC}"
             ${COVERALLS_UPLOAD}
             "${PROJECT_SOURCE_DIR}/cmake")
+    enable_testing()
+    add_test(runTests ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/runTests)
 endif()
 
 install (DIRECTORY data DESTINATION "${AdvertCast_BINARY_DIR}")
