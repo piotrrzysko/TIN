@@ -7,6 +7,10 @@
 
 #include "gtest/gtest.h"
 #include "common/Args.hpp"
+#include "common/MulticastUtils.hpp"
+#include "common/Parser.hpp"
+#include "common/SocketFactory.hpp"
+#include "common/VideoFile.hpp"
 
 TEST(CommonTests, TestArgsOptions) {
     char* argv[] = {
@@ -58,3 +62,57 @@ TEST(CommonTests, TestArgsUndefinedArg) {
     EXPECT_EQ(Arg::Undefined, args.getNext(arg));
     EXPECT_TRUE(args.isEnd());
 }
+
+TEST(CommonTests, TestArgsGetFromFileSuccess) {
+    std::ofstream tmp;
+    std::list<VideoFile> vfList;
+    char* argv[] = {"program", "-fake"};
+    Args args(2, argv);
+    tmp.open("filelist.tmp");
+    tmp << "0;local/path" << std::endl
+        << "1;some/path" << std::endl;
+    tmp.close();
+    EXPECT_TRUE(args.getFromFile("filelist.tmp", vfList));
+    unlink("filelist.tmp");
+    EXPECT_EQ(2, vfList.size());
+    EXPECT_EQ(0, vfList.front().getTimestamp());
+    EXPECT_EQ("local/path", vfList.front().getLocalPath());
+    EXPECT_EQ(1, vfList.back().getTimestamp());
+    EXPECT_EQ("some/path", vfList.back().getLocalPath());
+}
+
+TEST(CommonTests, TestArgsGetFromFileNoFile) {
+    std::ofstream tmp;
+    std::list<VideoFile> vfList;
+    char* argv[] = {"program", "-fake"};
+    Args args(2, argv);
+    EXPECT_FALSE(args.getFromFile("filelist.tmp", vfList));
+}
+
+TEST(CommonTests, TestArgsGetFromFileWrongFile) {
+    std::ofstream tmp;
+    std::list<VideoFile> vfList;
+    char* argv[] = {"program", "-fake"};
+    Args args(2, argv);
+    tmp.open("filelist.tmp");
+    tmp << "" << std::endl
+    << "1:some/path" << std::endl;
+    tmp.close();
+    EXPECT_FALSE(args.getFromFile("filelist.tmp", vfList));
+    unlink("filelist.tmp");
+}
+
+TEST(CommonTests, TestVideoFile) {
+    VideoFile vf(0, "local/path");
+    uint id = 1;
+    vf.setId(id);
+    EXPECT_EQ(id, vf.getId());
+    EXPECT_EQ(0, vf.getTimestamp());
+    EXPECT_EQ("local/path", vf.getLocalPath());
+}
+
+TEST(CommonTests, TestVideoFileComparison) {
+    VideoFile vf1(0, "local/path"), vf2(1, "some/path");
+    EXPECT_TRUE(vf2 < vf1);
+}
+
