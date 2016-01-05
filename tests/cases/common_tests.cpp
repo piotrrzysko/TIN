@@ -116,3 +116,102 @@ TEST(CommonTests, TestVideoFileComparison) {
     EXPECT_TRUE(vf2 < vf1);
 }
 
+TEST(CommonTests, TestParserMatchConnect) {
+    Parser parser;
+    EXPECT_TRUE(parser.matchConnect(TcpMessagesTypes::Connect));
+    EXPECT_FALSE(parser.matchConnect("test_string"));
+}
+
+TEST(CommonTests, TestParserMatchNAK) {
+    Parser parser;
+    uint clientId, fileId;
+    EXPECT_TRUE(parser.matchNAK(TcpMessagesTypes::NAK + " 1 2", clientId, fileId));
+    EXPECT_EQ(1, clientId);
+    EXPECT_EQ(2, fileId);
+    EXPECT_FALSE(parser.matchNAK("test_string", clientId, fileId));
+}
+
+TEST(CommonTests, TestParserMatchClient) {
+    Parser parser;
+    uint clientId;
+    std::string addr, port;
+    EXPECT_TRUE(parser.matchClient(TcpMessagesTypes::Client + " 1 maddr mport", clientId, addr, port));
+    EXPECT_EQ(1, clientId);
+    EXPECT_EQ("maddr", addr);
+    EXPECT_EQ("mport", port);
+    EXPECT_FALSE(parser.matchClient("test_string", clientId, addr, port));
+}
+
+TEST(CommonTests, TestParserMatchReport) {
+    Parser parser;
+    uint clientId, succ, err, buff;
+    EXPECT_TRUE(parser.matchReport(TcpMessagesTypes::Report + " 1 2 3 4", clientId, succ, err, buff));
+    EXPECT_EQ(1, clientId);
+    EXPECT_EQ(2, succ);
+    EXPECT_EQ(3, err);
+    EXPECT_EQ(4, buff);
+    EXPECT_FALSE(parser.matchReport("test_string", clientId, succ, err, buff));
+}
+
+TEST(CommonTests, TestParserMatchBegin) {
+    Parser parser;
+    uint fileId, number;
+    ulong size;
+    std::time_t stamp;
+    std::string data;
+    EXPECT_TRUE(parser.matchBegin(UdpMessagesTypes::Begin + " 1 2 3 4\ndata", fileId, number, stamp, size, data));
+    EXPECT_EQ(1, fileId);
+    EXPECT_EQ(2, number);
+    EXPECT_EQ(3, stamp);
+    EXPECT_EQ(4, size);
+    EXPECT_EQ("data", data);
+    EXPECT_FALSE(parser.matchBegin("test_string", fileId, number, stamp, size, data));
+    EXPECT_FALSE(parser.matchBegin(UdpMessagesTypes::Begin + " 1 2 3 4 data", fileId, number, stamp, size, data));
+}
+
+TEST(CommonTests, TestParserMatchMiddle) {
+    Parser parser;
+    uint fileId, number;
+    ulong size;
+    std::time_t stamp;
+    std::string data;
+    EXPECT_TRUE(parser.matchMiddle(UdpMessagesTypes::Middle + " 1 2 3 4\ndata", fileId, number, stamp, size, data));
+    EXPECT_EQ(1, fileId);
+    EXPECT_EQ(2, number);
+    EXPECT_EQ(3, stamp);
+    EXPECT_EQ(4, size);
+    EXPECT_EQ("data", data);
+    EXPECT_FALSE(parser.matchMiddle("test_string", fileId, number, stamp, size, data));
+    EXPECT_FALSE(parser.matchMiddle(UdpMessagesTypes::Middle + " 1 2 3 4 data", fileId, number, stamp, size, data));
+}
+
+TEST(CommonTests, TestParserMatchEnd) {
+    Parser parser;
+    uint fileId, number;
+    ulong size;
+    std::time_t stamp;
+    std::string data;
+    EXPECT_TRUE(parser.matchEnd(UdpMessagesTypes::End + " 1 2 3 4\ndata", fileId, number, stamp, size, data));
+    EXPECT_EQ(1, fileId);
+    EXPECT_EQ(2, number);
+    EXPECT_EQ(3, stamp);
+    EXPECT_EQ(4, size);
+    EXPECT_EQ("data", data);
+    EXPECT_FALSE(parser.matchEnd("test_string", fileId, number, stamp, size, data));
+    EXPECT_FALSE(parser.matchEnd(UdpMessagesTypes::End + " 1 2 3 4 data", fileId, number, stamp, size, data));
+}
+
+TEST(CommonTests, TestSocketFactoryCreateSocket) {
+    SocketFactory sf;
+    int sockfd;
+    struct sockaddr_storage addr;
+    sockfd = sf.createSocket("224.0.0.1", "8888", AF_UNSPEC, SOCK_DGRAM, &addr, false);
+    ASSERT_TRUE(sockfd > -1);
+    close(sockfd);
+    sockfd = sf.createSocket("", "5555", AF_UNSPEC, SOCK_STREAM, &addr, false);
+    ASSERT_TRUE(sockfd > -1);
+    close(sockfd);
+    sf.createSocket("127.0.0.1", "5555", AF_UNSPEC, SOCK_STREAM, nullptr, true);
+    ASSERT_TRUE(sockfd > -1);
+    close(sockfd);
+}
