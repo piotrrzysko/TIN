@@ -12,6 +12,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
 if (COVERALLS)
     include(Coveralls)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 --coverage")
+    link_libraries(gcov)
 endif()
 
 include_directories (${AdvertCast_SOURCE_DIR}/src)
