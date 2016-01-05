@@ -18,12 +18,6 @@ int main(int argc, char** argv)
     ClientController client;
     bool port = false, serverName = false;
 
-    if (argc != 5)
-    {
-        showUsage();
-        return EXIT_SUCCESS;
-    }
-
     Args args(argc, argv);
     while(!args.isEnd())
     {

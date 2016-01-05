@@ -19,12 +19,6 @@ int main(int argc, char** argv)
     bool portUdp = false, portTcp = false, files = false,
             interface = false, multicastAddr = false;
 
-    if (argc != 11)
-    {
-        showUsage();
-        return -1;
-    }
-
     Args args(argc, argv);
     while(!args.isEnd())
     {

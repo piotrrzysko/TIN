@@ -30,10 +30,14 @@ Arg Args::getNext(std::string &arg)
     std::string currentStr = *currPos;
     if (strToArg.find(currentStr) == strToArg.end())
     {
+        currPos++;
         return Arg::Undefined;
     } else
     {
-        arg = *(++currPos);
+        if(strToArg.at(currentStr) != Arg::Usage)
+            arg = *(++currPos);
+        else
+            arg = "";
         currPos++;
         return strToArg.at(currentStr);
     }

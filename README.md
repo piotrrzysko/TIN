@@ -1,4 +1,4 @@
-AdvertCast
+AdvertCast [![Build Status](https://travis-ci.org/piotreq53/TIN.svg)](https://travis-ci.org/piotreq53/TIN)
 ========
 
 ### Wymagania
