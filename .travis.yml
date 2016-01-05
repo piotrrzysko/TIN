@@ -8,6 +8,7 @@ before_install:
 install:
 - sudo apt-get install -qq g++-4.8
 - export CXX="g++-4.8"
-- make
+- sudo apt-get install -y -qq lcov curl
 
-script: make test
+script:
+- mkdir build && cd build && cmake -DCOVERALLS=ON -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . && cmake --build . --target coveralls
