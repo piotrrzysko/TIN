@@ -7,6 +7,8 @@
 
 #include "UDPClient.hpp"
 
+UDPClient::UDPClient() { }
+
 UDPClient::UDPClient(std::string multicastAddr, std::string port, ClientController *parent)
         : succ(0), err(0), parent(parent)
 {

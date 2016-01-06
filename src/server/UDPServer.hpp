@@ -31,6 +31,7 @@ class ServerController;
 
 class UDPServer {
 public:
+    UDPServer();
     UDPServer(std::string, std::string multicastInterface, std::string port, ServerController *parent);
     void addFiles(std::list<VideoFile> filesToSend);
     void addFileToQueue(uint fileId);

@@ -6,8 +6,18 @@
  */
 
 #include "gtest/gtest.h"
+#include "server/ServerController.hpp"
+#include "server/TCPServer.hpp"
+#include "server/UDPServer.hpp"
 
-TEST(ServerTests, EmptyTest) {
-    EXPECT_EQ(0, 0);
+TEST(ServerTests, TestServerController) {
+    ServerController sc;
 }
 
+TEST(ServerTests, TestTCPServer) {
+    TCPServer tcps;
+}
+
+TEST(ServerTests, TestUDPServer) {
+    UDPServer udps;
+}

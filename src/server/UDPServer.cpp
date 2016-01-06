@@ -7,6 +7,8 @@
 
 #include "UDPServer.hpp"
 
+UDPServer::UDPServer() { }
+
 UDPServer::UDPServer(std::string multicastAddr, std::string multicastInterface, std::string port, ServerController *parent)
         : parent(parent), lastFileId(0)
 {

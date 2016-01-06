@@ -6,7 +6,19 @@
  */
 
 #include "gtest/gtest.h"
+#include "client/ClientController.hpp"
+#include "client/ReceivedVideoFile.hpp"
+#include "client/TCPClient.hpp"
+#include "client/UDPClient.hpp"
 
-TEST(ClientTests, EmptyTest) {
-    EXPECT_EQ(0, 0);
+TEST(ClientTests, TestClientController) {
+    ClientController cc;
+}
+
+TEST(ClientTests, TestTCPClient) {
+    TCPClient tcpc;
+}
+
+TEST(ClientTests, TestUDPClient) {
+    UDPClient udpc;
 }

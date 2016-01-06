@@ -215,3 +215,7 @@ TEST(CommonTests, TestSocketFactoryCreateSocket) {
     ASSERT_TRUE(sockfd > -1);
     close(sockfd);
 }
+
+TEST(CommonTests, TestMulticastUtils) {
+    MulticastUtils mu;
+}

@@ -4,5 +4,4 @@ set (CMAKE_CXX_FLAGS "-Wall -std=c++11 -pthread -Wno-write-strings -Wsign-compar
 add_executable(runTests
         server_tests.cpp common_tests.cpp client_tests.cpp)
 
-target_link_libraries(runTests gtest gtest_main)
-target_link_libraries(runTests client common server)
+target_link_libraries(runTests gtest gtest_main lclient common lserver)

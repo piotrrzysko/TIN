@@ -7,6 +7,7 @@
 
 #include "TCPClient.hpp"
 
+TCPClient::TCPClient() { }
 
 TCPClient::TCPClient(std::string hostname, std::string port, ClientController *parent)
         : hostname(hostname), port(port), isConnected(false), parent(parent)

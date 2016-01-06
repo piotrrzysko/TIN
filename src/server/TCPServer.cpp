@@ -8,6 +8,8 @@
 
 #include "TCPServer.hpp"
 
+TCPServer::TCPServer() { }
+
 TCPServer::TCPServer(std::string port, ServerController *parent) : lastClientId(0), parent(parent)
 {
     if (initServer(port))

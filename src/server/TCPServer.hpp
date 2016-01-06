@@ -21,6 +21,7 @@ class ServerController;
 
 class TCPServer {
 public:
+    TCPServer();
     TCPServer(std::string port, ServerController *parent);
     void start();
     bool hasClients();

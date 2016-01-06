@@ -30,6 +30,7 @@ class ClientController;
 
 class UDPClient {
 public:
+    UDPClient();
     UDPClient(std::string multicastAddr, std::string port, ClientController *parent);
     void start();
     void dispose();

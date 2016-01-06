@@ -23,6 +23,7 @@ class ClientController;
 
 class TCPClient {
 public:
+    TCPClient();
     TCPClient(std::string hostname, std::string port, ClientController *parent);
     void start();
     void addToQueue(const std::string &msg);
