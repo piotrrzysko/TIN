@@ -13,14 +13,14 @@ include_directories (${AdvertCast_SOURCE_DIR}/src)
 set (EXECUTABLE_OUTPUT_PATH "${AdvertCast_BINARY_DIR}/bin")
 set (LIBRARY_OUTPUT_PATH "${AdvertCast_BINARY_DIR}/lib")
 
-add_subdirectory (src)
-
 if (TESTS)
     include(GCoveralls)
-    add_subdirectory (tests)
     enable_gcoveralls()
     link_libraries(gcov)
+    add_subdirectory (tests)
 endif()
+
+add_subdirectory (src)
 
 add_executable(client src/client/client_main.cpp)
 target_link_libraries(client lclient)
