@@ -44,4 +44,6 @@ const uint RECONNECT_INTERVAL = 10;
 
 const uint FILE_EXPIRATION_TIME_SEC = 2;
 
+const std::string FILE_PREFIX = "./movie_";
+
 #endif //ADVERTCAST_CONSTS_HPP

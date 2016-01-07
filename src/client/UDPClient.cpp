@@ -85,11 +85,16 @@ void UDPClient::handleDatagram(bool wrongDatagram, uint fileId, uint number, boo
         }
         if (it->second.isFull())
         {
-            std::string filePath = "./test_" + std::to_string(it->first);
-            it->second.writeToFile(filePath);
-            videoFiles.erase(it);
-            logger::info << "Saved: file_id = [" << fileId << "] to file = [" << filePath << "].\n";
-            succ++;
+            std::string filePath = FILE_PREFIX + std::to_string(it->first);
+            if (it->second.writeToFile(filePath))
+            {
+                videoFiles.erase(it);
+                logger::info << "Saved: file_id = [" << fileId << "] to file = [" << filePath << "].\n";
+                succ++;
+            } else
+            {
+                logger::info << "Error saving: file_id = [" << fileId << "] to file = [" << filePath << "].\n";
+            }
         }
         mutex_files.unlock();
     } else

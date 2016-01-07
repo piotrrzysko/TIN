@@ -38,7 +38,8 @@ bool ReceivedVideoFile::writeToFile(const std::string &filepath)
     }
     videoFile.close();
 
-    // TODO: obsluga bledow
+    if (videoFile.bad())
+        return false;
     return true;
 }
 
