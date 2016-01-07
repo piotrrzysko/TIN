@@ -13,7 +13,7 @@ install:
 - sudo apt-get install -qq g++-4.9
 - export CXX="g++-4.9"
 - sudo apt-get install -y -qq lcov curl docker
-- cd scripts && sudo ./run-containers.sh 10.1.1.1
+- cd scripts && sudo ./run-containers.sh 10.1.1.1 && cd ..
 
 script:
 - mkdir build && cd build && cmake -DTESTS=ON .. && make && sed -i 's/^gcov/gcov-4.9/' coveralls-upload && ./bin/runTests && ./coveralls-upload
