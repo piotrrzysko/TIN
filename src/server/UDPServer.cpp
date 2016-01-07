@@ -7,6 +7,8 @@
 
 #include "UDPServer.hpp"
 
+bool UDPLoopGuard = true;
+
 UDPServer::UDPServer() { }
 
 UDPServer::UDPServer(std::string multicastAddr, std::string multicastInterface, std::string port, ServerController *parent)
@@ -24,7 +26,7 @@ UDPServer::UDPServer(std::string multicastAddr, std::string multicastInterface, 
 void UDPServer::start()
 {
     sleep(5);
-    while(true)
+    while(UDPLoopGuard)
     {
         VideoFile videofileToSend = getFromQueue();
 

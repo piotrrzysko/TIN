@@ -8,6 +8,8 @@
 
 #include "TCPServer.hpp"
 
+bool TCPLoopGuard = true;
+
 TCPServer::TCPServer() { }
 
 TCPServer::TCPServer(std::string port, ServerController *parent) : lastClientId(0), parent(parent)
@@ -27,7 +29,7 @@ void TCPServer::start()
     socklen_t addrlen;
     struct sockaddr_storage clientaddr;
 
-    while(true)
+    while(TCPLoopGuard)
     {
         addrlen = sizeof(clientaddr);
         connfd = accept(listenfd, (struct sockaddr *)&clientaddr, &addrlen);
