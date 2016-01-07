@@ -68,11 +68,14 @@ void UDPServer::addFiles(std::list<VideoFile> filesToSend)
 void UDPServer::addFileToQueue(uint fileId)
 {
     std::unique_lock<std::mutex> mlock(mutex);
-    if (videoFiles.find(fileId) != videoFiles.end())
+    if (videoFiles.find(fileId) != videoFiles.end()
+        && videoFilesInQueue.find(fileId) == videoFilesInQueue.end())
     {
         VideoFile videoToQueue = videoFiles[fileId];
         videoToQueue.setId(fileId);
         filesToSendQueue.push(videoToQueue);
+        videoFilesInQueue[fileId] = TransmisionType::MULTICAST;
+        logger::info << "Added to queue file_id = [" << fileId << "].\n";
         mlock.unlock();
         cond.notify_one();
     } else
@@ -90,6 +93,8 @@ VideoFile UDPServer::getFromQueue()
     }
     VideoFile item = filesToSendQueue.top();
     filesToSendQueue.pop();
+    videoFilesInQueue.erase(item.getId());
+    mlock.unlock();
     return item;
 }
 

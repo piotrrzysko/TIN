@@ -8,6 +8,11 @@
 #ifndef ADVERTCAST_CONSTS_HPP
 #define ADVERTCAST_CONSTS_HPP
 
+enum class TransmisionType {
+    MULTICAST,
+    UNICAST
+};
+
 namespace ArgsStr {
     const std::string Usage = "-help";
     const std::string Port = "-p";

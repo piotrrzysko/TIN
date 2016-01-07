@@ -46,6 +46,7 @@ private:
     uint lastFileId;
     std::unordered_map<uint, VideoFile> videoFiles;
     std::priority_queue<VideoFile> filesToSendQueue;
+    std::unordered_map<uint, TransmisionType> videoFilesInQueue;
     std::mutex mutex;
     std::condition_variable cond;
 
