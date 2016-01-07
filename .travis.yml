@@ -11,4 +11,4 @@ install:
 - sudo apt-get install -y -qq lcov curl
 
 script:
-- mkdir build && cd build && cmake -DCOVERALLS=ON .. && make && ./bin/runTests && ./coveralls-upload
+- mkdir build && cd build && cmake -DCOVERALLS=ON .. && make && rm /usr/bin/gcov && ln -s /usr/bin/gcov gcov-4.9 && ./bin/runTests && ./coveralls-upload
