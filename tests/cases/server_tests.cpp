@@ -5,6 +5,7 @@
  * 04.01.2015
  */
 
+#include <fcntl.h>
 #include "gtest/gtest.h"
 #include "server/ServerController.hpp"
 #include "server/TCPServer.hpp"
@@ -14,6 +15,10 @@
 
 void udpbreak(void) {
     UDPLoopGuard = false;
+}
+
+void tcpbreak(void) {
+    TCPLoopGuard = false;
 }
 
 TEST(ServerTests, TestServerController) {
@@ -46,13 +51,13 @@ TEST(ServerTests, TestUDPServer) {
     tmp1 << "0;file_to_send.mp4" << std::endl;
     tmp1.close();
     tmp2.open("file_to_send.mp4");
-    tmp2.seekp((1<<20) - 1);
+    tmp2.seekp(1<<20);
     tmp2 << "" << std::endl;
     tmp2.close();
     args.getFromFile("filelist.tmp", vfList);
     server.addFiles(vfList);
     UDPLoopGuard = true;
-    SENDTO_BREAK = udpbreak;
+    SENDTO_BREAK = &udpbreak;
     UDPSleep = 0;
     server.start();
     UDPSleep = 5;
@@ -78,10 +83,31 @@ TEST(ServerTests, TestUDPServerInitNoInterface) {
 }
 
 TEST(ServerTests, TestUDPServerEmpty) {
-    UDPServer tcps;
+    UDPServer server;
 }
 
 TEST(ServerTests, TestTCPServer) {
+    ServerController sc;
+    TCPServer server("5557", &sc);
+    int fd;
+    std::ofstream tmp;
+    tmp.open("file.txt");
+    tmp.seekp(3070);
+    tmp << "" << std::endl;
+    tmp.close();
+    fd = open("file.txt", O_RDONLY);
+    ACCEPT_RETURNS = fd;
+    TCPLoopGuard = true;
+    ACCEPT_BREAK = &tcpbreak;
+    server.start();
+    ACCEPT_BREAK = NULL;
+    TCPLoopGuard = true;
+    ACCEPT_RETURNS = 0;
+    close(fd);
+    unlink("file.txt");
+}
+
+TEST(ServerTests, TestTCPServerEmpty) {
     TCPServer tcps;
 }
 
