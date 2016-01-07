@@ -10,6 +10,7 @@
 #include "common/MulticastUtils.hpp"
 #include "common/Parser.hpp"
 #include "common/SocketFactory.hpp"
+#include "common/Logger.hpp"
 #include "common/VideoFile.hpp"
 
 TEST(CommonTests, TestArgsOptions) {
@@ -241,6 +242,13 @@ TEST(CommonTests, TestSocketFactoryCreateSocketFailure) {
     struct sockaddr_storage addr;
     sockfd = sf.createSocket("addr", "port", AF_UNSPEC, SOCK_DGRAM, &addr, false);
     ASSERT_TRUE(sockfd == -1);
+}
+
+TEST(CommonTests, TestLogger) {
+    std::stringstream ss("");
+    logger::Logger log(ss, "");
+    log << "TEST RUN";
+    EXPECT_EQ("TEST RUN", ss.str());
 }
 
 TEST(CommonTests, TestMulticastUtils) {
