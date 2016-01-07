@@ -8,6 +8,7 @@
 #ifndef ADVERTCAST_SERVERCONTROLLER_HPP
 #define ADVERTCAST_SERVERCONTROLLER_HPP
 
+#include <cstdlib>
 #include <thread>
 
 #include "UDPServer.hpp"

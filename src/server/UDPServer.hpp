@@ -28,6 +28,7 @@
 #include "ServerController.hpp"
 
 extern bool UDPLoopGuard;
+extern unsigned int UDPSleep;
 
 class ServerController;
 

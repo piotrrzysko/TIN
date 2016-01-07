@@ -14,12 +14,12 @@ bool MulticastUtils::isMulticastAddress(struct sockaddr_storage *addr)
         case AF_INET:
         {
             struct sockaddr_in *addr4 = (struct sockaddr_in *)addr;
-            return IN_MULTICAST(ntohl(addr4->sin_addr.s_addr)) >= 0;
+            return IN_MULTICAST(ntohl(addr4->sin_addr.s_addr));
         }
         case AF_INET6:
         {
             struct sockaddr_in6 *addr6 = (struct sockaddr_in6 *)addr;
-            return IN6_IS_ADDR_MULTICAST(&addr6->sin6_addr) >= 0;
+            return IN6_IS_ADDR_MULTICAST(&addr6->sin6_addr);
         }
         default:
         {

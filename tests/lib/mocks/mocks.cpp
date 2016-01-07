@@ -6,21 +6,21 @@
 #include "mock.hpp"
 
 int ACCEPT_RETURNS = 0;
-bool ACCEPT_BREAK = false;
+void (*ACCEPT_BREAK)(void);
 int LISTEN_RETURNS = 0;
-bool LISTEN_BREAK = false;
+void (*LISTEN_BREAK)(void);
 ssize_t SENDTO_RETURNS = 0;
-bool SENDTO_BREAK = false;
+void (*SENDTO_BREAK)(void);
 
 int accept (int __fd, __SOCKADDR_ARG __addr, socklen_t *__restrict __addr_len) {
     if (ACCEPT_BREAK)
-        pthread_exit(NULL);
+        ACCEPT_BREAK();
     return ACCEPT_RETURNS;
 }
 
 int listen (int __fd, int __n) {
     if (LISTEN_BREAK)
-        pthread_exit(NULL);
+        LISTEN_BREAK();
     return LISTEN_RETURNS;
 }
 
@@ -28,6 +28,6 @@ ssize_t sendto (int __fd, const void *__buf, size_t __n,
                 int __flags, __CONST_SOCKADDR_ARG __addr,
                 socklen_t __addr_len) {
     if (SENDTO_BREAK)
-        pthread_exit(NULL);
+        SENDTO_BREAK();
     return SENDTO_RETURNS;
 }

@@ -8,6 +8,7 @@
 #include "UDPServer.hpp"
 
 bool UDPLoopGuard = true;
+unsigned int UDPSleep = 5;
 
 UDPServer::UDPServer() { }
 
@@ -25,7 +26,7 @@ UDPServer::UDPServer(std::string multicastAddr, std::string multicastInterface, 
 
 void UDPServer::start()
 {
-    sleep(5);
+    sleep(UDPSleep);
     while(UDPLoopGuard)
     {
         VideoFile videofileToSend = getFromQueue();
@@ -113,14 +114,14 @@ bool UDPServer::initServer(std::string multicastAddr, std::string multicastInter
         return false;
     }
 
-    if (!multicastUtils.isMulticastAddress(&addr) < 0)
+    if (!multicastUtils.isMulticastAddress(&addr))
     {
         logger::error << "Wrong multicast address.\n";
         close(sockfd);
         return false;
     }
 
-    if (!multicastUtils.setMulticastInterface(sockfd, multicastInterface, &addr) < 0)
+    if (!multicastUtils.setMulticastInterface(sockfd, multicastInterface, &addr))
     {
         logger::error << "Setting local interface error.\n";
         close(sockfd);

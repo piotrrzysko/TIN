@@ -16,10 +16,10 @@
 #define ADVERTCAST_MOCK_H
 
 extern int ACCEPT_RETURNS;
-extern bool ACCEPT_BREAK;
+extern void (*ACCEPT_BREAK)(void);
 extern int LISTEN_RETURNS;
-extern bool LISTEN_BREAK;
+extern void (*LISTEN_BREAK)(void);
 extern ssize_t SENDTO_RETURNS;
-extern bool SENDTO_BREAK;
+extern void (*SENDTO_BREAK)(void);
 
 #endif //ADVERTCAST_MOCK_H
