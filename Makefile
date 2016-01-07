@@ -7,5 +7,3 @@ all:
 	
 clean:
 	rm -rf build
-test:
-	./build/bin/runTests
