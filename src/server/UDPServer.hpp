@@ -27,6 +27,8 @@
 #include "../common/consts.hpp"
 #include "ServerController.hpp"
 
+extern bool UDPLoopGuard;
+
 class ServerController;
 
 class UDPServer {

@@ -17,6 +17,8 @@
 #include "../common/Parser.hpp"
 #include "ServerController.hpp"
 
+extern bool TCPLoopGuard;
+
 class ServerController;
 
 class TCPServer {
