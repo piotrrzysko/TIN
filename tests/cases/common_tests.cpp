@@ -89,6 +89,19 @@ TEST(CommonTests, TestArgsGetFromFileNoFile) {
     EXPECT_FALSE(args.getFromFile("filelist.tmp", vfList));
 }
 
+TEST(CommonTests, TestArgsGetFromFileFailure) {
+    std::ofstream tmp;
+    std::list<VideoFile> vfList;
+    char* argv[] = {"program", "-fake"};
+    Args args(2, argv);
+    tmp.open("filelist.tmp");
+    tmp << "bad_int;local/path" << std::endl
+    << "very_badINT$;some/path" << std::endl;
+    tmp.close();
+    EXPECT_FALSE(args.getFromFile("filelist.tmp", vfList));
+    unlink("filelist.tmp");
+}
+
 TEST(CommonTests, TestArgsGetFromFileWrongFile) {
     std::ofstream tmp;
     std::list<VideoFile> vfList;
@@ -109,6 +122,12 @@ TEST(CommonTests, TestVideoFile) {
     EXPECT_EQ(id, vf.getId());
     EXPECT_EQ(0, vf.getTimestamp());
     EXPECT_EQ("local/path", vf.getLocalPath());
+}
+
+TEST(CommonTests, TestVideoFileConstructor) {
+    VideoFile vf;
+    EXPECT_EQ(0, vf.getTimestamp());
+    EXPECT_EQ("", vf.getLocalPath());
 }
 
 TEST(CommonTests, TestVideoFileComparison) {
@@ -201,7 +220,7 @@ TEST(CommonTests, TestParserMatchEnd) {
     EXPECT_FALSE(parser.matchEnd(UdpMessagesTypes::End + " 1 2 3 4 data", fileId, number, stamp, size, data));
 }
 
-TEST(CommonTests, TestSocketFactoryCreateSocket) {
+TEST(CommonTests, TestSocketFactoryCreateSocketSuccess) {
     SocketFactory sf;
     int sockfd;
     struct sockaddr_storage addr;
@@ -214,6 +233,14 @@ TEST(CommonTests, TestSocketFactoryCreateSocket) {
     sf.createSocket("127.0.0.1", "5555", AF_UNSPEC, SOCK_STREAM, nullptr, true);
     ASSERT_TRUE(sockfd > -1);
     close(sockfd);
+}
+
+TEST(CommonTests, TestSocketFactoryCreateSocketFailure) {
+    SocketFactory sf;
+    int sockfd;
+    struct sockaddr_storage addr;
+    sockfd = sf.createSocket("addr", "port", AF_UNSPEC, SOCK_DGRAM, &addr, false);
+    ASSERT_TRUE(sockfd == -1);
 }
 
 TEST(CommonTests, TestMulticastUtils) {
