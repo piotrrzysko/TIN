@@ -98,7 +98,7 @@ void TCPServer::handleRequest(const std::string &msg, int connfd)
     } else if (parser.matchReport(msg, clientId, succ, err, buff))
     {
         logger::info << "Received REPORT from client_id = [" << clientId << "] succ = [" << succ
-            << "] err = [" << buff << "] buff = [" << buff << "].\n";
+            << "] err = [" << err << "] buff = [" << buff << "].\n";
     } else if (parser.matchConnect(msg))
     {
         logger::info << "Received CONNECT.\n";
