@@ -1,4 +1,4 @@
-AdvertCast [![Build Status](https://travis-ci.org/piotreq53/TIN.svg)](https://travis-ci.org/piotreq53/TIN)
+AdvertCast [![Build Status](https://travis-ci.org/piotreq53/TIN.svg)](https://travis-ci.org/piotreq53/TIN) [![Coverage Status](https://coveralls.io/repos/piotreq53/TIN/badge.svg?branch=master&service=github)](https://coveralls.io/github/piotreq53/TIN?branch=master)
 ========
 
 ### Wymagania
